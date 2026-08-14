@@ -1,0 +1,77 @@
+[gd_scene load_steps=8 format=3 uid="uid://dsgx2efyewe56"]
+
+[ext_resource type="PackedScene" uid="uid://cdgxjdanbyl1q" path="res://scenes/bubbles/Bubble.tscn" id="1_0oucd"]
+[ext_resource type="Script" uid="uid://bsvpqkqwobj3i" path="res://scripts/launcher.gd" id="2_o48be"]
+[ext_resource type="Script" uid="uid://irx484u4ydxy" path="res://scripts/bubble_grid.gd" id="3_dbpbd"]
+[ext_resource type="Script" uid="uid://dgwb8f267qjqm" path="res://scripts/game_manager.gd" id="4_hvp6l"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8syxq"]
+size = Vector2(20, 1280)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0oucd"]
+size = Vector2(20, 1280)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o48be"]
+size = Vector2(740, 20)
+
+[node name="Game" type="Node2D"]
+
+[node name="Camera" type="Camera2D" parent="."]
+
+[node name="Playfield" type="Node2D" parent="."]
+
+[node name="Background" type="ColorRect" parent="Playfield"]
+offset_left = -360.0
+offset_top = -640.0
+offset_right = 360.0
+offset_bottom = 640.0
+color = Color(0.7219114, 0.74540037, 0.9863865, 1)
+
+[node name="Boundaries" type="Node2D" parent="Playfield"]
+
+[node name="LeftWall" type="StaticBody2D" parent="Playfield/Boundaries"]
+position = Vector2(-370, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Playfield/Boundaries/LeftWall"]
+shape = SubResource("RectangleShape2D_8syxq")
+
+[node name="RightWall" type="StaticBody2D" parent="Playfield/Boundaries"]
+position = Vector2(370, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Playfield/Boundaries/RightWall"]
+shape = SubResource("RectangleShape2D_0oucd")
+
+[node name="Ceiling" type="StaticBody2D" parent="Playfield/Boundaries"]
+position = Vector2(0, -650)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Playfield/Boundaries/Ceiling"]
+shape = SubResource("RectangleShape2D_o48be")
+
+[node name="Launcher" type="Node2D" parent="."]
+position = Vector2(0, 500)
+script = ExtResource("2_o48be")
+
+[node name="AimLine" type="Line2D" parent="Launcher"]
+points = PackedVector2Array(0, 0, 0, -300)
+width = 5.0
+default_color = Color(0.5568628, 1, 0.16470589, 1)
+
+[node name="BubbleSpawnPoint" type="Marker2D" parent="Launcher"]
+position = Vector2(0, 40)
+
+[node name="BubbleGrid" type="Node2D" parent="."]
+position = Vector2(-304, -608)
+script = ExtResource("3_dbpbd")
+bubble_scene = ExtResource("1_0oucd")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("4_hvp6l")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="ScoreLabel" type="Label" parent="UI"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 81.0
+offset_bottom = 43.0
+text = "Score: 0"

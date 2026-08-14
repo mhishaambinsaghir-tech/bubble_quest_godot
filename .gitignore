@@ -1,0 +1,10 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Godot-generated files
+export_presets.cfg
+
+# System / IDE files
+.DS_Store
+Thumbs.db
+*.tmp
