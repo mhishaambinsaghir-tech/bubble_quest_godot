@@ -127,7 +127,7 @@ func _ready() -> void:
 
 	call_deferred("start_game")
 
-func setup_button_animations(btn: Button) -> void:
+func setup_button_animations(btn: Control) -> void:
 	if btn == null:
 		return
 	btn.pivot_offset = btn.size / 2.0
