@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://b7bhsrrvqb2q0"]
 
-[ext_resource type="Texture2D" path="res://assets/backgrounds/main_menu_bg.jpg" id="1_bg"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/levels_bg.jpg" id="1_bg"]
 
 [sub_resource type="GDScript" id="GDScript_level_select"]
 script/source = "extends Control

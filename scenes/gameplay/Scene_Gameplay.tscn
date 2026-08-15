@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://dgwb8f267qjqm" path="res://scripts/game_manager.gd" id="4_hvp6l"]
 [ext_resource type="Texture2D" uid="uid://dijmghdrgflb7" path="res://assets/launcher/trajectory_dot.png" id="5_dot"]
 [ext_resource type="Texture2D" uid="uid://krx5763t7nyq" path="res://assets/launcher/trajectory_arrow.png" id="6_arrow"]
-[ext_resource type="Texture2D" uid="uid://bk535biems6fc" path="res://assets/backgrounds/main_menu_bg.jpg" id="7_bg"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/levels_bg.jpg" id="7_bg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8syxq"]
 size = Vector2(20, 1280)
