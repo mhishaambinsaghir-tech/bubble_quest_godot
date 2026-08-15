@@ -192,21 +192,23 @@ func setup_ui() -> void:
 		victory_main_menu_button.pressed.connect(_on_main_menu_pressed)
 
 var next_bubble_type: int = -1
-var next_bubble_preview_node: Polygon2D = null
+var next_bubble_preview_node: Sprite2D = null
 
 func update_next_bubble_preview() -> void:
 	if launcher == null:
 		return
 	if next_bubble_preview_node == null or not is_instance_valid(next_bubble_preview_node):
-		next_bubble_preview_node = Polygon2D.new()
-		var preview_script = load("res://scripts/next_bubble_preview.gd")
-		if preview_script != null:
-			next_bubble_preview_node.set_script(preview_script)
+		next_bubble_preview_node = Sprite2D.new()
 		next_bubble_preview_node.position = Vector2(-70, 40)
 		launcher.add_child(next_bubble_preview_node)
 
 	if next_bubble_type >= 0:
-		next_bubble_preview_node.color = BubbleTypes.get_color(next_bubble_type)
+		var tex = BubbleTypes.get_texture(next_bubble_type)
+		if tex != null:
+			next_bubble_preview_node.texture = tex
+			var tex_size = tex.get_size()
+			if tex_size.x > 0 and tex_size.y > 0:
+				next_bubble_preview_node.scale = Vector2(48.0 / tex_size.x, 48.0 / tex_size.y)
 
 func start_game() -> void:
 	current_level_index = selected_level_index

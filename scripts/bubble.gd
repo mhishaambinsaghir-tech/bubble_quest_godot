@@ -16,17 +16,6 @@ var is_attached = false
 
 func _ready() -> void:
 
-	# Create temporary circular visual
-	for point in points:
-		var angle = deg_to_rad(point * step_size)
-
-		var x = cos(angle) * radius
-		var y = sin(angle) * radius
-
-		circle_points.append(Vector2(x, y))
-
-	$Visual.polygon = circle_points
-
 	set_bubble_type(bubble_type)
 
 	# Connect signals only if they aren't already connected
@@ -99,9 +88,14 @@ func _on_area_entered(area: Area2D) -> void:
 func set_bubble_type(new_type: int) -> void:
 	bubble_type = new_type
 
-	var bubble_color = BubbleTypes.get_color(bubble_type)
-	$Visual.color = bubble_color
+	var tex = BubbleTypes.get_texture(bubble_type)
+	if tex != null and has_node("Visual"):
+		$Visual.texture = tex
+		var tex_size = tex.get_size()
+		if tex_size.x > 0 and tex_size.y > 0:
+			$Visual.scale = Vector2((radius * 2.0) / tex_size.x, (radius * 2.0) / tex_size.y)
 
+	var bubble_color = BubbleTypes.get_color(bubble_type)
 	if has_node("GPUParticles2D"):
 		$GPUParticles2D.modulate = bubble_color
 

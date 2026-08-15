@@ -8,6 +8,20 @@ enum BubbleType {
 	PURPLE
 }
 
+static func get_texture(bubble_type: int) -> Texture2D:
+	match bubble_type:
+		BubbleType.RED:
+			return preload("res://assets/bubbles/red_bubble.png")
+		BubbleType.BLUE:
+			return preload("res://assets/bubbles/blue_bubble.png")
+		BubbleType.GREEN:
+			return preload("res://assets/bubbles/green_bubble.png")
+		BubbleType.YELLOW:
+			return preload("res://assets/bubbles/yellow_bubble.png")
+		BubbleType.PURPLE:
+			return preload("res://assets/bubbles/purple_bubble.png")
+	return null
+
 static func get_color(bubble_type: int) -> Color:
 	match bubble_type:
 		BubbleType.RED:

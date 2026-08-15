@@ -20,8 +20,7 @@ script = ExtResource("1_34sai")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_0ddbq")
 
-[node name="Visual" type="Polygon2D" parent="."]
-color = Color(255, 0, 0, 1)
+[node name="Visual" type="Sprite2D" parent="."]
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="."]
 emitting = false
