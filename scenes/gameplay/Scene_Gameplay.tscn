@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://dgwb8f267qjqm" path="res://scripts/game_manager.gd" id="4_hvp6l"]
 [ext_resource type="Texture2D" path="res://assets/launcher/trajectory_dot.png" id="5_dot"]
 [ext_resource type="Texture2D" path="res://assets/launcher/trajectory_arrow.png" id="6_arrow"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/main_menu_bg.jpg" id="7_bg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8syxq"]
 size = Vector2(20, 1280)
@@ -22,12 +23,14 @@ size = Vector2(740, 20)
 
 [node name="Playfield" type="Node2D" parent="."]
 
-[node name="Background" type="ColorRect" parent="Playfield"]
+[node name="Background" type="TextureRect" parent="Playfield"]
 offset_left = -360.0
 offset_top = -640.0
 offset_right = 360.0
 offset_bottom = 640.0
-color = Color(0.7219114, 0.74540037, 0.9863865, 1)
+texture = ExtResource("7_bg")
+expand_mode = 1
+stretch_mode = 6
 
 [node name="Boundaries" type="Node2D" parent="Playfield"]
 

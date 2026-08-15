@@ -1,4 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://bmdwtsfndkfy5"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/main_menu_bg.jpg" id="1_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/main_menu_game_title.png" id="2_title"]
+[ext_resource type="Texture2D" path="res://assets/ui/main_menu_play_button.png" id="3_play"]
+[ext_resource type="Texture2D" path="res://assets/ui/main_menu_level_select_button.png" id="4_level"]
+[ext_resource type="Texture2D" path="res://assets/ui/main_menu_quit_button.png" id="5_quit"]
 
 [sub_resource type="GDScript" id="GDScript_main_menu"]
 script/source = "extends Control
@@ -20,7 +24,7 @@ func _ready() -> void:
 	level_btn.pressed.connect(_on_level_select_pressed)
 	quit_btn.pressed.connect(_on_quit_pressed)
 
-func setup_button(btn: Button) -> void:
+func setup_button(btn: Control) -> void:
 	if btn == null: return
 	btn.pivot_offset = btn.size / 2.0
 	btn.resized.connect(func(): btn.pivot_offset = btn.size / 2.0)
@@ -65,6 +69,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_bg")
+expand_mode = 1
+stretch_mode = 6
+
 [node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -75,28 +90,35 @@ grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 12
 
-[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+[node name="TitleTexture" type="TextureRect" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(440, 240)
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
-text = "BUBBLE QUEST"
-horizontal_alignment = 1
+texture = ExtResource("2_title")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="PlayButton" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(260, 64)
+[node name="PlayButton" type="TextureButton" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(260, 140)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
-text = "PLAY"
+size_flags_horizontal = 4
+texture_normal = ExtResource("3_play")
+ignore_texture_size = true
+stretch_mode = 5
 
-[node name="LevelSelectButton" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(260, 64)
+[node name="LevelSelectButton" type="TextureButton" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(260, 140)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "LEVEL SELECT"
+size_flags_horizontal = 4
+texture_normal = ExtResource("4_level")
+ignore_texture_size = true
+stretch_mode = 5
 
-[node name="QuitButton" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(260, 64)
+[node name="QuitButton" type="TextureButton" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(200, 110)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "QUIT"
+size_flags_horizontal = 4
+texture_normal = ExtResource("5_quit")
+ignore_texture_size = true
+stretch_mode = 5
