@@ -11,7 +11,38 @@ var total_columns = 10
 @export var bubble_scene: PackedScene
 
 func _ready() -> void:
-	create_test_grid()
+	pass
+
+func clear_grid() -> void:
+	for cell in grid:
+		var bubble = grid[cell]
+		if bubble != null and is_instance_valid(bubble):
+			bubble.queue_free()
+	grid.clear()
+
+func load_level(level_data: LevelData) -> void:
+	clear_grid()
+
+	if level_data == null:
+		print("No LevelData provided; creating fallback test grid.")
+		create_test_grid()
+		return
+
+	if level_data.danger_row > 0:
+		danger_row = level_data.danger_row
+
+	for cell in level_data.grid_layout:
+		var cell_coord: Vector2i = cell
+		var bubble_type: int = int(level_data.grid_layout[cell])
+
+		var bubble = bubble_scene.instantiate()
+		bubble.position = grid_to_world(cell_coord)
+		bubble.is_attached = true
+		add_child(bubble)
+		bubble.set_bubble_type(bubble_type)
+		grid[cell_coord] = bubble
+
+	print("LEVEL LOADED: ", level_data.level_name, " | Bubbles: ", grid.size())
 
 func grid_to_world(cell: Vector2i) -> Vector2:
 	var x = cell.y * bubble_spacing

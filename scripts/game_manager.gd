@@ -23,9 +23,19 @@ var max_bubble_speed: float = 1000.0
 
 var can_shoot := false
 
+@export var levels: Array[LevelData] = []
+var current_level_index: int = 0
+
 func _ready() -> void:
 
 	randomize()
+
+	if levels.is_empty():
+		for i in range(1, 11):
+			var path: String = "res://data/levels/level_%02d.tres" % i
+			var lvl = load(path)
+			if lvl != null:
+				levels.append(lvl)
 
 	score_label.text = "Score: 0"
 	score_label.position = Vector2(20, 20)
@@ -38,6 +48,23 @@ func _ready() -> void:
 	call_deferred("start_game")
 
 func start_game() -> void:
+	current_level_index = 0
+	load_active_level()
+
+func load_active_level() -> void:
+	game_state = GameState.PLAYING
+
+	if current_bubble != null and is_instance_valid(current_bubble):
+		current_bubble.queue_free()
+		current_bubble = null
+
+	var bubble_grid = get_tree().current_scene.get_node_or_null("BubbleGrid")
+	if bubble_grid != null:
+		if levels.size() > 0 and current_level_index < levels.size():
+			bubble_grid.load_level(levels[current_level_index])
+		else:
+			bubble_grid.load_level(null)
+
 	spawn_current_bubble()
 	enable_shooting()
 
@@ -149,7 +176,12 @@ func win_game() -> void:
 
 	game_state = GameState.WON
 
-	print("GAME WON!")
+	print("LEVEL WON!")
+
+	if levels.size() > 0:
+		current_level_index = (current_level_index + 1) % levels.size()
+		print("ADVANCING TO NEXT LEVEL: Index ", current_level_index)
+		call_deferred("load_active_level")
 
 func lose_game() -> void:
 	if game_state != GameState.PLAYING:
@@ -160,4 +192,4 @@ func lose_game() -> void:
 	print("GAME OVER!")
 
 func restart_game() -> void:
-	get_tree().reload_current_scene()
+	load_active_level()

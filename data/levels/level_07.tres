@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/LevelData.gd" id="1_level_data"]
+
+[resource]
+script = ExtResource("1_level_data")
+level_id = 7
+level_name = "Level 7 - Diamond Core"
+grid_layout = {
+Vector2i(0, 4): 0,
+Vector2i(0, 5): 0,
+Vector2i(1, 3): 2,
+Vector2i(1, 4): 0,
+Vector2i(1, 5): 0,
+Vector2i(1, 6): 2,
+Vector2i(2, 3): 2,
+Vector2i(2, 4): 3,
+Vector2i(2, 5): 3,
+Vector2i(2, 6): 2,
+Vector2i(3, 2): 4,
+Vector2i(3, 3): 3,
+Vector2i(3, 4): 3,
+Vector2i(3, 5): 3,
+Vector2i(3, 6): 4,
+Vector2i(4, 3): 4,
+Vector2i(4, 4): 4,
+Vector2i(4, 5): 4,
+Vector2i(4, 6): 4,
+Vector2i(5, 4): 2,
+Vector2i(5, 5): 2
+}
+danger_row = 7
