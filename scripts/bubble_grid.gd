@@ -145,8 +145,6 @@ func attach_bubble(bubble: Area2D,hit_bubble: Area2D) -> void:
 	if bubble.has_method("play_attach_feedback"):
 		bubble.play_attach_feedback()
 
-	print("Bubble attached to cell: ", best_cell)
-
 	finish_bubble_turn(best_cell)
 
 func attach_bubble_to_ceiling(bubble: Area2D) -> void:
@@ -188,21 +186,11 @@ func attach_bubble_to_ceiling(bubble: Area2D) -> void:
 	if bubble.has_method("play_attach_feedback"):
 		bubble.play_attach_feedback()
 
-	print(
-		"Bubble attached to ceiling cell: ",
-		best_cell
-	)
-
 	finish_bubble_turn(best_cell)
 
 func finish_bubble_turn(cell: Vector2i) -> void:
 
 	var matches = find_matching_bubbles(cell)
-
-	print(
-		"Matching bubbles found: ",
-		matches.size()
-	)
 
 	var game_manager = (
 		get_tree()
@@ -231,24 +219,6 @@ func finish_bubble_turn(cell: Vector2i) -> void:
 		)
 
 		game_manager.add_score(total_score)
-
-		print(
-			"Matched bubbles: ",
-			matches.size()
-		)
-
-		print(
-			"Floating bubbles: ",
-			floating_count
-		)
-
-		print(
-			"Score gained: ",
-			total_score
-		)
-
-	else:
-		print("No match.")
 
 	# ------------------------------------------------
 	# WIN CONDITION

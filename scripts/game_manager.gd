@@ -258,8 +258,6 @@ func add_score(points: int) -> void:
 	if score_label != null:
 		score_label.text = "Score: " + str(score)
 
-	print("Score: ", score)
-
 func get_random_bubble_type() -> int:
 	var bubble_grid = get_tree().current_scene.get_node("BubbleGrid")
 
@@ -307,21 +305,15 @@ func spawn_current_bubble() -> void:
 
 	can_shoot = true
 
-	print("New bubble spawned")
-	print("Bubble type: ", bubble_type)
-	print("Bubble speed: ", bubble_speed)
-
 func shoot_current_bubble(direction: Vector2) -> void:
 
 	if game_state != GameState.PLAYING:
 		return
 
 	if not can_shoot:
-		print("Cannot shoot right now.")
 		return
 
 	if current_bubble == null:
-		print("No active bubble.")
 		return
 
 	if not is_instance_valid(current_bubble):
@@ -335,8 +327,6 @@ func shoot_current_bubble(direction: Vector2) -> void:
 
 	# Launch the current bubble.
 	current_bubble.launch(direction)
-
-	print("Bubble launched.")
 
 func get_current_bubble() -> Area2D:
 

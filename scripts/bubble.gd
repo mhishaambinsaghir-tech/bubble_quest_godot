@@ -15,7 +15,6 @@ var speed: float = 600.0
 var is_attached = false
 
 func _ready() -> void:
-	print("BUBBLE CREATED: ", global_position)
 
 	# Create temporary circular visual
 	for point in points:
@@ -48,7 +47,6 @@ func _physics_process(delta: float) -> void:
 		global_position += velocity * delta
 
 func _on_body_entered(body: Node) -> void:
-	print("BODY HIT: ", body.name)
 
 	if body.name == "LeftWall":
 		var collision_shape = body.get_node("CollisionShape2D")
@@ -65,7 +63,6 @@ func _on_body_entered(body: Node) -> void:
 		velocity.x = -abs(velocity.x)
 
 	elif body.name == "Ceiling":
-		print("CEILING DETECTED!")
 
 		if is_attached:
 			return
