@@ -28,4 +28,4 @@ Vector2i(3, 4): 1,
 Vector2i(3, 5): 1,
 Vector2i(3, 6): 2
 }
-danger_row = 7
+danger_row = 14
