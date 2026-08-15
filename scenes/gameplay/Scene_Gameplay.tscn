@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dsgx2efyewe56"]
+[gd_scene load_steps=12 format=3 uid="uid://dsgx2efyewe56"]
 
 [ext_resource type="PackedScene" uid="uid://cdgxjdanbyl1q" path="res://scenes/bubbles/Bubble.tscn" id="1_0oucd"]
 [ext_resource type="Script" uid="uid://bsvpqkqwobj3i" path="res://scripts/launcher.gd" id="2_o48be"]
@@ -6,7 +6,8 @@
 [ext_resource type="Script" uid="uid://dgwb8f267qjqm" path="res://scripts/game_manager.gd" id="4_hvp6l"]
 [ext_resource type="Texture2D" uid="uid://dijmghdrgflb7" path="res://assets/launcher/trajectory_dot.png" id="5_dot"]
 [ext_resource type="Texture2D" uid="uid://krx5763t7nyq" path="res://assets/launcher/trajectory_arrow.png" id="6_arrow"]
-[ext_resource type="Texture2D" path="res://assets/backgrounds/levels_bg.jpg" id="7_bg"]
+[ext_resource type="Texture2D" uid="uid://y4n2juwt4evv" path="res://assets/backgrounds/levels_bg.jpg" id="7_bg"]
+[ext_resource type="Texture2D" uid="uid://ddisl8dkm5giw" path="res://assets/ui/pause_button.png" id="8_pause"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8syxq"]
 size = Vector2(20, 1280)
@@ -106,39 +107,49 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -330.0
-offset_top = 30.0
-offset_right = -60.0
-offset_bottom = 75.0
+offset_left = -340.0
+offset_top = 20.0
+offset_right = -150.0
+offset_bottom = 68.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(1, 0.92, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.15, 0.95)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 28
 text = "Score: 0"
+vertical_alignment = 1
 
 [node name="LevelLabel" type="Label" parent="GameUI/HUD"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -330.0
-offset_top = 80.0
-offset_right = 140.0
-offset_bottom = 120.0
+offset_left = -140.0
+offset_top = 20.0
+offset_right = 210.0
+offset_bottom = 68.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.15, 0.95)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 22
 text = "LEVEL 1"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="PauseButton" type="Button" parent="GameUI/HUD"]
+[node name="PauseButton" type="TextureButton" parent="GameUI/HUD"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = 210.0
-offset_top = 30.0
-offset_right = 330.0
-offset_bottom = 85.0
+offset_left = 220.0
+offset_top = 16.0
+offset_right = 340.0
+offset_bottom = 72.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 24
-text = "PAUSE"
+texture_normal = ExtResource("8_pause")
+ignore_texture_size = true
+stretch_mode = 5
 
 [node name="PausePanel" type="Panel" parent="GameUI/HUD"]
 visible = false

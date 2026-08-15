@@ -4,10 +4,10 @@ var grid = {}
 
 var bubble_spacing = 64.0
 
-var total_rows = 4
+var total_rows = 6
 var total_columns = 10
 
-@export var danger_row: int = 7
+@export var danger_row: int = 14
 @export var bubble_scene: PackedScene
 
 func _ready() -> void:
