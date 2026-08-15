@@ -42,6 +42,10 @@ func get_aim_direction() -> Vector2:
 
 	return result
 
+func _ready() -> void:
+	if has_node("AimLine"):
+		$AimLine.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+
 func _process(_delta: float) -> void:
 	if not can_aim:
 		return

@@ -54,11 +54,13 @@ position = Vector2(0, 500)
 script = ExtResource("2_o48be")
 
 [node name="AimLine" type="Line2D" parent="Launcher"]
+texture_repeat = 2
 points = PackedVector2Array(0, 0, 0, -300)
-width = 16.0
+width = 14.0
 texture = ExtResource("5_dot")
 texture_mode = 1
 default_color = Color(0.2, 0.9, 1, 0.95)
+antialiased = true
 
 [node name="AimArrow" type="Sprite2D" parent="Launcher"]
 visible = false
