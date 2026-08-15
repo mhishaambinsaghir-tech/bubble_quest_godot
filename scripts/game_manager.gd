@@ -208,7 +208,8 @@ func update_next_bubble_preview() -> void:
 			next_bubble_preview_node.texture = tex
 			var tex_size = tex.get_size()
 			if tex_size.x > 0 and tex_size.y > 0:
-				next_bubble_preview_node.scale = Vector2(48.0 / tex_size.x, 48.0 / tex_size.y)
+				var scale_factor = 48.0 / max(tex_size.x, tex_size.y)
+				next_bubble_preview_node.scale = Vector2(scale_factor, scale_factor)
 
 func start_game() -> void:
 	current_level_index = selected_level_index
