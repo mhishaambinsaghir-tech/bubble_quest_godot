@@ -35,8 +35,11 @@ func _ready() -> void:
 		"res://scenes/bubbles/Bubble.tscn"
 	)
 
-	# Wait until the scene is completely ready
-	call_deferred("spawn_current_bubble")
+	call_deferred("start_game")
+
+func start_game() -> void:
+	spawn_current_bubble()
+	enable_shooting()
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
@@ -85,7 +88,6 @@ func spawn_current_bubble() -> void:
 	var bubble_type = get_random_bubble_type()
 
 	current_bubble.set_bubble_type(bubble_type)
-	current_bubble.speed = bubble_speed
 
 	current_bubble.global_position = bubble_spawn_point.global_position
 
@@ -98,6 +100,10 @@ func spawn_current_bubble() -> void:
 	print("Bubble speed: ", bubble_speed)
 
 func shoot_current_bubble(direction: Vector2) -> void:
+
+	if game_state != GameState.PLAYING:
+		return
+
 	if not can_shoot:
 		print("Cannot shoot right now.")
 		return
@@ -108,11 +114,14 @@ func shoot_current_bubble(direction: Vector2) -> void:
 
 	if not is_instance_valid(current_bubble):
 		current_bubble = null
-		print("Active bubble is invalid.")
+		can_shoot = false
 		return
 
+	# Lock the shooting system immediately.
 	can_shoot = false
+	launcher.can_aim = false
 
+	# Launch the current bubble.
 	current_bubble.launch(direction)
 
 	print("Bubble launched.")
@@ -128,8 +137,8 @@ func get_current_bubble() -> Area2D:
 	return null
 	
 func enable_shooting() -> void:
-	var launcher = get_node("../Launcher")
-	launcher.can_shoot = true
+	can_shoot = true
+	launcher.enable_aim()
 
 func is_playing() -> bool:
 	return game_state == GameState.PLAYING

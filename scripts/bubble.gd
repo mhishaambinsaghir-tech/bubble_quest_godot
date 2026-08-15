@@ -1,10 +1,12 @@
 extends Area2D
 
+@export var radius: float = 32.0
+
 var bubble_type: int = BubbleTypes.BubbleType.RED
 
 var points = range(0, 32)
 var step_size = 360.0 / 32.0
-var radius = 32.0
+
 var circle_points = []
 
 var velocity = Vector2.ZERO
@@ -48,17 +50,30 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node) -> void:
 	print("BODY HIT: ", body.name)
 
-	# Bounce from walls
-	if body.name == "LeftWall" or body.name == "RightWall":
-		velocity.x = -velocity.x
-		return
+	if body.name == "LeftWall":
+		var collision_shape = body.get_node("CollisionShape2D")
+		var half_width = collision_shape.shape.size.x / 2.0
 
-	# Attach to ceiling
-	if body.name == "Ceiling":
+		global_position.x = body.global_position.x + half_width + radius
+		velocity.x = abs(velocity.x)
+
+	elif body.name == "RightWall":
+		var collision_shape = body.get_node("CollisionShape2D")
+		var half_width = collision_shape.shape.size.x / 2.0
+
+		global_position.x = body.global_position.x - half_width - radius
+		velocity.x = -abs(velocity.x)
+
+	elif body.name == "Ceiling":
 		print("CEILING DETECTED!")
 
 		if is_attached:
 			return
+
+		var collision_shape = body.get_node("CollisionShape2D")
+		var half_height = collision_shape.shape.size.y / 2.0
+
+		global_position.y = body.global_position.y + half_height + radius
 
 		velocity = Vector2.ZERO
 		is_attached = true
