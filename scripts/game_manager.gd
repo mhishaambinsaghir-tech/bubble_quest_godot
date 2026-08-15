@@ -98,9 +98,9 @@ static func record_level_completion(level_index: int, final_score: int) -> void:
 var bubble_scene: PackedScene
 var current_bubble: Area2D
 
-var bubble_speed: float = 600.0
+var bubble_speed: float = 1600.0
 var speed_increase: float = 25.0
-var max_bubble_speed: float = 1000.0
+var max_bubble_speed: float = 2000.0
 
 var can_shoot := false
 
