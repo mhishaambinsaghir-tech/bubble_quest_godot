@@ -23,6 +23,13 @@ size = Vector2(740, 20)
 
 [node name="Playfield" type="Node2D" parent="."]
 
+[node name="OuterBackdrop" type="ColorRect" parent="Playfield"]
+offset_left = -2000.0
+offset_top = -2000.0
+offset_right = 2000.0
+offset_bottom = 2000.0
+color = Color(0.12, 0.12, 0.14, 1)
+
 [node name="Background" type="TextureRect" parent="Playfield"]
 offset_left = -360.0
 offset_top = -640.0
