@@ -177,6 +177,19 @@ func update_aim_line(direction: Vector2) -> void:
 
 	$AimLine.points = line_points
 
+	if has_node("AimArrow"):
+		var arrow = $AimArrow
+		if line_points.size() >= 2:
+			var end_pos = line_points[line_points.size() - 1]
+			var prev_pos = line_points[line_points.size() - 2]
+			var final_dir = (end_pos - prev_pos).normalized()
+
+			arrow.position = end_pos
+			arrow.rotation = final_dir.angle() + PI / 2.0
+			arrow.visible = can_aim
+		else:
+			arrow.visible = false
+
 func find_bubble_collision(
 	start_position: Vector2,
 	direction: Vector2,
@@ -268,9 +281,13 @@ func _input(event: InputEvent) -> void:
 
 			can_aim = false
 			$AimLine.visible = false
+			if has_node("AimArrow"):
+				$AimArrow.visible = false
 
 			game_manager.shoot_current_bubble(direction)
 
 func enable_aim() -> void:
 	can_aim = true
 	$AimLine.visible = true
+	if has_node("AimArrow"):
+		$AimArrow.visible = true

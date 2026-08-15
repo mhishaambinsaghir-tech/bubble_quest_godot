@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://bsvpqkqwobj3i" path="res://scripts/launcher.gd" id="2_o48be"]
 [ext_resource type="Script" uid="uid://irx484u4ydxy" path="res://scripts/bubble_grid.gd" id="3_dbpbd"]
 [ext_resource type="Script" uid="uid://dgwb8f267qjqm" path="res://scripts/game_manager.gd" id="4_hvp6l"]
+[ext_resource type="Texture2D" path="res://assets/launcher/trajectory_dot.png" id="5_dot"]
+[ext_resource type="Texture2D" path="res://assets/launcher/trajectory_arrow.png" id="6_arrow"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8syxq"]
 size = Vector2(20, 1280)
@@ -53,8 +55,17 @@ script = ExtResource("2_o48be")
 
 [node name="AimLine" type="Line2D" parent="Launcher"]
 points = PackedVector2Array(0, 0, 0, -300)
-width = 5.0
-default_color = Color(0.5568628, 1, 0.16470589, 1)
+width = 16.0
+texture = ExtResource("5_dot")
+texture_mode = 1
+default_color = Color(0.2, 0.9, 1, 0.95)
+
+[node name="AimArrow" type="Sprite2D" parent="Launcher"]
+visible = false
+texture = ExtResource("6_arrow")
+offset = Vector2(0, -12)
+modulate = Color(0.2, 0.9, 1, 1)
+scale = Vector2(0.65, 0.65)
 
 [node name="BubbleSpawnPoint" type="Marker2D" parent="Launcher"]
 position = Vector2(0, 40)
