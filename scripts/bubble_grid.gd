@@ -142,6 +142,9 @@ func attach_bubble(bubble: Area2D,hit_bubble: Area2D) -> void:
 
 	grid[best_cell] = bubble
 
+	if bubble.has_method("play_attach_feedback"):
+		bubble.play_attach_feedback()
+
 	print("Bubble attached to cell: ", best_cell)
 
 	finish_bubble_turn(best_cell)
@@ -181,6 +184,9 @@ func attach_bubble_to_ceiling(bubble: Area2D) -> void:
 	)
 
 	grid[best_cell] = bubble
+
+	if bubble.has_method("play_attach_feedback"):
+		bubble.play_attach_feedback()
 
 	print(
 		"Bubble attached to ceiling cell: ",
@@ -393,7 +399,10 @@ func remove_bubbles(bubbles: Array) -> void:
 		if grid.has(cell):
 			grid.erase(cell)
 
-		bubble.queue_free()
+		if bubble.has_method("pop"):
+			bubble.pop()
+		else:
+			bubble.queue_free()
 
 func find_ceiling_connected() -> Dictionary:
 
@@ -456,7 +465,12 @@ func remove_floating_bubbles() -> int:
 
 		grid.erase(cell)
 
-		bubble.queue_free()
+		if bubble.has_method("fall_and_free"):
+			bubble.fall_and_free()
+		elif bubble.has_method("pop"):
+			bubble.pop()
+		else:
+			bubble.queue_free()
 
 	return floating.size()
 

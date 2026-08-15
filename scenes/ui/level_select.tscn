@@ -4,14 +4,59 @@
 script/source = "extends Control
 
 func _ready() -> void:
+	var gm = load(\"res://scripts/game_manager.gd\")
+	if gm != null:
+		gm.load_save_data()
+
+	var highest_unlocked = gm.highest_unlocked_level if gm != null else 0
+	var scores = gm.best_scores if gm != null else {}
+
 	var level_grid = $VBoxContainer/LevelGrid
 	for i in range(1, 11):
 		var btn = level_grid.get_node_or_null(\"Level\" + str(i) + \"Button\")
 		if btn != null:
 			var idx = i - 1
-			btn.pressed.connect(func(): _on_level_selected(idx))
+			var is_unlocked = (idx <= highest_unlocked)
 
-	$VBoxContainer/BackButton.pressed.connect(_on_back_pressed)
+			if is_unlocked:
+				btn.disabled = false
+				setup_button(btn)
+				var str_idx = str(idx)
+				if scores.has(str_idx):
+					btn.text = \"LEVEL \" + str(i) + \"\\nBest: \" + str(scores[str_idx])
+				else:
+					btn.text = \"LEVEL \" + str(i)
+				btn.pressed.connect(func(): _on_level_selected(idx))
+			else:
+				btn.disabled = true
+				btn.text = \"LEVEL \" + str(i) + \"\\n(LOCKED)\"
+
+	var back_btn = $VBoxContainer/BackButton
+	if back_btn != null:
+		setup_button(back_btn)
+		back_btn.pressed.connect(_on_back_pressed)
+
+func setup_button(btn: Button) -> void:
+	if btn == null: return
+	btn.pivot_offset = btn.size / 2.0
+	btn.resized.connect(func(): btn.pivot_offset = btn.size / 2.0)
+	btn.mouse_entered.connect(func():
+		var tw = btn.create_tween()
+		tw.tween_property(btn, \"scale\", Vector2(1.06, 1.06), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	)
+	btn.mouse_exited.connect(func():
+		var tw = btn.create_tween()
+		tw.tween_property(btn, \"scale\", Vector2(1.0, 1.0), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	)
+	btn.button_down.connect(func():
+		var tw = btn.create_tween()
+		tw.tween_property(btn, \"scale\", Vector2(0.95, 0.95), 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	)
+	btn.button_up.connect(func():
+		var tw = btn.create_tween()
+		var target = Vector2(1.06, 1.06) if btn.is_hovered() else Vector2(1.0, 1.0)
+		tw.tween_property(btn, \"scale\", target, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	)
 
 func _on_level_selected(idx: int) -> void:
 	var gm = load(\"res://scripts/game_manager.gd\")

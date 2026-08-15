@@ -11,6 +11,62 @@ var game_state = GameState.PLAYING
 var score = 0
 
 static var selected_level_index: int = 0
+static var highest_unlocked_level: int = 0
+static var best_scores: Dictionary = {}
+
+const SAVE_FILE_PATH: String = "user://save_data.json"
+
+static func load_save_data() -> void:
+	if not FileAccess.file_exists(SAVE_FILE_PATH):
+		highest_unlocked_level = 0
+		best_scores = {}
+		return
+
+	var file = FileAccess.open(SAVE_FILE_PATH, FileAccess.READ)
+	if file == null:
+		highest_unlocked_level = 0
+		best_scores = {}
+		return
+
+	var json_text = file.get_as_text()
+	file.close()
+
+	var json = JSON.new()
+	var parse_result = json.parse(json_text)
+	if parse_result != OK or not (json.data is Dictionary):
+		print("Save file parse error or invalid format. Fallback to default progression.")
+		highest_unlocked_level = 0
+		best_scores = {}
+		return
+
+	var data: Dictionary = json.data
+	highest_unlocked_level = int(data.get("highest_unlocked_level", 0))
+	best_scores = data.get("best_scores", {})
+	print("SAVE DATA LOADED: Highest Unlocked =", highest_unlocked_level, " Best Scores =", best_scores)
+
+static func save_progression() -> void:
+	var data = {
+		"highest_unlocked_level": highest_unlocked_level,
+		"best_scores": best_scores
+	}
+	var file = FileAccess.open(SAVE_FILE_PATH, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(data, "\t"))
+		file.close()
+		print("PROGRESSION SAVED TO FILE.")
+
+static func record_level_completion(level_index: int, final_score: int) -> void:
+	var str_idx = str(level_index)
+	var current_best = int(best_scores.get(str_idx, 0))
+	if final_score > current_best:
+		best_scores[str_idx] = final_score
+		print("NEW BEST SCORE FOR LEVEL ", level_index + 1, ": ", final_score)
+
+	if level_index + 1 > highest_unlocked_level:
+		highest_unlocked_level = level_index + 1
+		print("UNLOCKED NEXT LEVEL: Index ", highest_unlocked_level)
+
+	save_progression()
 
 @onready var game_ui = $"../GameUI"
 @onready var hud = $"../GameUI/HUD"
@@ -54,6 +110,7 @@ var current_level_index: int = 0
 func _ready() -> void:
 
 	randomize()
+	load_save_data()
 
 	if levels.is_empty():
 		for i in range(1, 11):
@@ -70,9 +127,42 @@ func _ready() -> void:
 
 	call_deferred("start_game")
 
+func setup_button_animations(btn: Button) -> void:
+	if btn == null:
+		return
+	btn.pivot_offset = btn.size / 2.0
+	btn.resized.connect(func(): btn.pivot_offset = btn.size / 2.0)
+
+	btn.mouse_entered.connect(func():
+		var tw = btn.create_tween()
+		tw.tween_property(btn, "scale", Vector2(1.06, 1.06), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	)
+	btn.mouse_exited.connect(func():
+		var tw = btn.create_tween()
+		tw.tween_property(btn, "scale", Vector2(1.0, 1.0), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	)
+	btn.button_down.connect(func():
+		var tw = btn.create_tween()
+		tw.tween_property(btn, "scale", Vector2(0.95, 0.95), 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	)
+	btn.button_up.connect(func():
+		var tw = btn.create_tween()
+		var target = Vector2(1.06, 1.06) if btn.is_hovered() else Vector2(1.0, 1.0)
+		tw.tween_property(btn, "scale", target, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	)
+
 func setup_ui() -> void:
 	if game_ui != null:
 		game_ui.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	var all_buttons = [
+		pause_button, resume_button, pause_restart_button, pause_main_menu_button,
+		next_level_button, replay_button, retry_button, lose_main_menu_button,
+		victory_main_menu_button
+	]
+	for btn in all_buttons:
+		if btn != null:
+			setup_button_animations(btn)
 
 	if pause_button != null:
 		pause_button.pressed.connect(_on_pause_pressed)
@@ -272,6 +362,8 @@ func win_game() -> void:
 	game_state = GameState.WON
 	launcher.can_aim = false
 	can_shoot = false
+
+	record_level_completion(current_level_index, score)
 
 	if current_level_index >= levels.size() - 1:
 		print("ALL LEVELS COMPLETED! FINAL VICTORY!")

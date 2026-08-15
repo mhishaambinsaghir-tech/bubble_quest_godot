@@ -102,4 +102,51 @@ func _on_area_entered(area: Area2D) -> void:
 func set_bubble_type(new_type: int) -> void:
 	bubble_type = new_type
 
-	$Visual.color = BubbleTypes.get_color(bubble_type)
+	var bubble_color = BubbleTypes.get_color(bubble_type)
+	$Visual.color = bubble_color
+
+	if has_node("GPUParticles2D"):
+		$GPUParticles2D.modulate = bubble_color
+
+var is_popping: bool = false
+
+func pop() -> void:
+	if is_popping:
+		return
+	is_popping = true
+	monitoring = false
+	monitorable = false
+
+	if has_node("GPUParticles2D"):
+		$GPUParticles2D.emitting = true
+
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(self, "scale", Vector2.ZERO, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	tween.tween_property(self, "modulate:a", 0.0, 0.15)
+	tween.chain().tween_callback(queue_free)
+
+func play_attach_feedback() -> void:
+	if is_popping or is_falling:
+		return
+	var tween = create_tween()
+	tween.tween_property(self, "scale", Vector2(1.15, 1.15), 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
+var is_falling: bool = false
+
+func fall_and_free() -> void:
+	if is_popping or is_falling:
+		return
+	is_falling = true
+	monitoring = false
+	monitorable = false
+
+	var random_x = randf_range(-60.0, 60.0)
+	var random_rotation = randf_range(-PI, PI)
+	var target_pos = global_position + Vector2(random_x, 1400.0)
+
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(self, "global_position", target_pos, 0.7).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(self, "rotation", random_rotation, 0.7)
+	tween.tween_property(self, "modulate:a", 0.0, 0.7).set_ease(Tween.EASE_IN)
+	tween.chain().tween_callback(queue_free)

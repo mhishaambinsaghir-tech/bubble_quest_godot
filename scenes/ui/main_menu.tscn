@@ -4,13 +4,48 @@
 script/source = "extends Control
 
 func _ready() -> void:
-	$CenterContainer/VBoxContainer/PlayButton.pressed.connect(_on_play_pressed)
-	$CenterContainer/VBoxContainer/LevelSelectButton.pressed.connect(_on_level_select_pressed)
-	$CenterContainer/VBoxContainer/QuitButton.pressed.connect(_on_quit_pressed)
+	var gm = load(\"res://scripts/game_manager.gd\")
+	if gm != null:
+		gm.load_save_data()
+
+	var play_btn = $CenterContainer/VBoxContainer/PlayButton
+	var level_btn = $CenterContainer/VBoxContainer/LevelSelectButton
+	var quit_btn = $CenterContainer/VBoxContainer/QuitButton
+
+	setup_button(play_btn)
+	setup_button(level_btn)
+	setup_button(quit_btn)
+
+	play_btn.pressed.connect(_on_play_pressed)
+	level_btn.pressed.connect(_on_level_select_pressed)
+	quit_btn.pressed.connect(_on_quit_pressed)
+
+func setup_button(btn: Button) -> void:
+	if btn == null: return
+	btn.pivot_offset = btn.size / 2.0
+	btn.resized.connect(func(): btn.pivot_offset = btn.size / 2.0)
+	btn.mouse_entered.connect(func():
+		var tw = btn.create_tween()
+		tw.tween_property(btn, \"scale\", Vector2(1.06, 1.06), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	)
+	btn.mouse_exited.connect(func():
+		var tw = btn.create_tween()
+		tw.tween_property(btn, \"scale\", Vector2(1.0, 1.0), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	)
+	btn.button_down.connect(func():
+		var tw = btn.create_tween()
+		tw.tween_property(btn, \"scale\", Vector2(0.95, 0.95), 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	)
+	btn.button_up.connect(func():
+		var tw = btn.create_tween()
+		var target = Vector2(1.06, 1.06) if btn.is_hovered() else Vector2(1.0, 1.0)
+		tw.tween_property(btn, \"scale\", target, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	)
 
 func _on_play_pressed() -> void:
 	var gm = load(\"res://scripts/game_manager.gd\")
 	if gm != null:
+		gm.load_save_data()
 		gm.selected_level_index = 0
 	get_tree().change_scene_to_file(\"res://scenes/gameplay/Scene_Gameplay.tscn\")
 
