@@ -42,17 +42,39 @@ func get_aim_direction() -> Vector2:
 
 	return result
 
+var anim_time: float = 0.0
+
 func _ready() -> void:
 	if has_node("AimLine"):
 		$AimLine.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not can_aim:
 		return
 
 	var direction: Vector2 = get_aim_direction()
 
 	update_aim_line(direction)
+	animate_aim_effects(delta)
+
+func animate_aim_effects(delta: float) -> void:
+	anim_time += delta
+
+	if game_manager != null and is_instance_valid(game_manager.current_bubble):
+		var b_type = game_manager.current_bubble.bubble_type
+		var target_color = BubbleTypes.get_color(b_type)
+		var blended_color = target_color.lerp(Color(0.3, 0.9, 1.0), 0.55)
+		blended_color.a = 0.95
+
+		if has_node("AimLine"):
+			$AimLine.default_color = $AimLine.default_color.lerp(blended_color, delta * 8.0)
+
+		if has_node("AimArrow"):
+			$AimArrow.modulate = $AimArrow.modulate.lerp(blended_color, delta * 8.0)
+
+	if has_node("AimArrow") and $AimArrow.visible:
+		var pulse = 0.65 + sin(anim_time * 6.0) * 0.06
+		$AimArrow.scale = Vector2(pulse, pulse)
 
 func update_aim_line(direction: Vector2) -> void:
 	if is_vec_invalid(direction) or direction.length_squared() < 0.0001:
@@ -273,12 +295,19 @@ func find_bubble_collision(
 	return closest_distance
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		if (
-			event.button_index == MOUSE_BUTTON_LEFT
-			and event.pressed
-		):
-			if not can_aim:
+	if event is InputEventMouseButton and event.pressed:
+		if not can_aim:
+			return
+
+		if event.button_index == MOUSE_BUTTON_RIGHT:
+			game_manager.swap_bubbles()
+			return
+
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			var mouse_pos: Vector2 = get_global_mouse_position()
+			var preview_global_pos: Vector2 = to_global(Vector2(-70, 40))
+			if mouse_pos.distance_to(preview_global_pos) <= 50.0:
+				game_manager.swap_bubbles()
 				return
 
 			var direction: Vector2 = get_aim_direction()

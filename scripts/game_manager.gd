@@ -80,7 +80,7 @@ static func record_level_completion(level_index: int, final_score: int) -> void:
 @onready var pause_main_menu_button = $"../GameUI/HUD/PausePanel/VBoxContainer/MainMenuButton"
 
 @onready var win_panel = $"../GameUI/HUD/WinPanel"
-@onready var win_score_label = $"../GameUI/HUD/WinPanel/VBoxContainer/WinScoreLabel"
+@onready var win_score_label = $"../GameUI/HUD/WinPanel/VBoxContainer/ScoreBanner/WinScoreLabel" if has_node("../GameUI/HUD/WinPanel/VBoxContainer/ScoreBanner/WinScoreLabel") else $"../GameUI/HUD/WinPanel/VBoxContainer/WinScoreLabel"
 @onready var next_level_button = $"../GameUI/HUD/WinPanel/VBoxContainer/NextLevelButton"
 @onready var replay_button = $"../GameUI/HUD/WinPanel/VBoxContainer/ReplayButton"
 
@@ -211,6 +211,49 @@ func update_next_bubble_preview() -> void:
 				var scale_factor = 48.0 / max(tex_size.x, tex_size.y)
 				next_bubble_preview_node.scale = Vector2(scale_factor, scale_factor)
 
+	if not launcher.has_node("NextBubbleLabel"):
+		var label = Label.new()
+		label.name = "NextBubbleLabel"
+		label.text = "SWAP"
+		label.position = Vector2(-95, 68)
+		label.size = Vector2(50, 20)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 11)
+		label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.75))
+		label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+		label.add_theme_constant_override("outline_size", 4)
+		launcher.add_child(label)
+
+func swap_bubbles() -> void:
+	if game_state != GameState.PLAYING:
+		return
+	if not can_shoot:
+		return
+	if current_bubble == null or not is_instance_valid(current_bubble):
+		return
+	if next_bubble_type < 0:
+		return
+
+	var old_current_type: int = current_bubble.bubble_type
+	var old_next_type: int = next_bubble_type
+
+	current_bubble.set_bubble_type(old_next_type)
+	next_bubble_type = old_current_type
+
+	update_next_bubble_preview()
+
+	# Juice: visual bounce animation when swapped
+	if is_instance_valid(current_bubble):
+		var tw_current = current_bubble.create_tween()
+		tw_current.tween_property(current_bubble, "scale", Vector2(1.2, 1.2), 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw_current.tween_property(current_bubble, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
+	if next_bubble_preview_node != null and is_instance_valid(next_bubble_preview_node):
+		var base_scale = next_bubble_preview_node.scale
+		var tw_preview = next_bubble_preview_node.create_tween()
+		tw_preview.tween_property(next_bubble_preview_node, "scale", base_scale * 1.25, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw_preview.tween_property(next_bubble_preview_node, "scale", base_scale, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
 func start_game() -> void:
 	current_level_index = selected_level_index
 	load_active_level()
@@ -250,9 +293,11 @@ func load_active_level() -> void:
 	enable_shooting()
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey:
-		if event.pressed and event.keycode == KEY_R:
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_R:
 			restart_game()
+		elif event.keycode == KEY_C or event.keycode == KEY_SPACE:
+			swap_bubbles()
 
 func add_score(points: int) -> void:
 

@@ -20,6 +20,10 @@ script = ExtResource("1_34sai")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_0ddbq")
 
+[node name="Shadow" type="Sprite2D" parent="."]
+modulate = Color(0, 0, 0, 0.35)
+position = Vector2(2, 4)
+
 [node name="Visual" type="Sprite2D" parent="."]
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="."]

@@ -97,6 +97,10 @@ func set_bubble_type(new_type: int) -> void:
 			var scale_factor = target_diameter / max(tex_size.x, tex_size.y)
 			$Visual.scale = Vector2(scale_factor, scale_factor)
 
+			if has_node("Shadow"):
+				$Shadow.texture = tex
+				$Shadow.scale = Vector2(scale_factor, scale_factor)
+
 	var bubble_color = BubbleTypes.get_color(bubble_type)
 	if has_node("GPUParticles2D"):
 		$GPUParticles2D.modulate = bubble_color

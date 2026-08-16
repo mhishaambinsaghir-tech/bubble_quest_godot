@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://0duds6ecvyds"
-path="res://.godot/imported/levels_bg.jpg-b70da295fb958fa659ff72c9d9049322.ctex"
+uid="uid://cmr62na8qmab"
+path="res://.godot/imported/pause_panel_restart_button.png-6fc4fa736c0bae21661ea78ef4b84efc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/backgrounds/levels_bg.jpg"
-dest_files=["res://.godot/imported/levels_bg.jpg-b70da295fb958fa659ff72c9d9049322.ctex"]
+source_file="res://assets/ui/pause_panel_restart_button.png"
+dest_files=["res://.godot/imported/pause_panel_restart_button.png-6fc4fa736c0bae21661ea78ef4b84efc.ctex"]
 
 [params]
 
