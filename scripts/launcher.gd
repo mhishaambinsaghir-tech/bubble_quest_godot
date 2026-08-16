@@ -63,17 +63,21 @@ func animate_aim_effects(delta: float) -> void:
 	if game_manager != null and is_instance_valid(game_manager.current_bubble):
 		var b_type = game_manager.current_bubble.bubble_type
 		var target_color = BubbleTypes.get_color(b_type)
-		var blended_color = target_color.lerp(Color(0.3, 0.9, 1.0), 0.55)
-		blended_color.a = 0.95
+
+		var line_color = target_color.lerp(Color(0.3, 0.9, 1.0), 0.55)
+		line_color.a = 0.55
+
+		var arrow_color = target_color.lerp(Color(0.4, 0.95, 1.0), 0.35)
+		arrow_color.a = 1.0
 
 		if has_node("AimLine"):
-			$AimLine.default_color = $AimLine.default_color.lerp(blended_color, delta * 8.0)
+			$AimLine.default_color = $AimLine.default_color.lerp(line_color, delta * 8.0)
 
 		if has_node("AimArrow"):
-			$AimArrow.modulate = $AimArrow.modulate.lerp(blended_color, delta * 8.0)
+			$AimArrow.modulate = $AimArrow.modulate.lerp(arrow_color, delta * 8.0)
 
 	if has_node("AimArrow") and $AimArrow.visible:
-		var pulse = 0.65 + sin(anim_time * 6.0) * 0.06
+		var pulse = 0.75 + sin(anim_time * 6.0) * 0.06
 		$AimArrow.scale = Vector2(pulse, pulse)
 
 func update_aim_line(direction: Vector2) -> void:
@@ -294,22 +298,49 @@ func find_bubble_collision(
 
 	return closest_distance
 
-func _input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed:
-		if not can_aim:
-			return
+var is_touch_aiming: bool = false
+var swapped_this_touch: bool = false
 
-		if event.button_index == MOUSE_BUTTON_RIGHT:
+func _input(event: InputEvent) -> void:
+	if not can_aim:
+		return
+
+	# Right-click instantly swaps bubbles
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		game_manager.swap_bubbles()
+		return
+
+	var is_down: bool = false
+	var is_up: bool = false
+
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		is_down = event.pressed
+		is_up = not event.pressed
+	elif event is InputEventScreenTouch:
+		is_down = event.pressed
+		is_up = not event.pressed
+
+	if is_down:
+		var local_touch: Vector2 = to_local(get_global_mouse_position())
+		var preview_local: Vector2 = Vector2(-70, 40)
+
+		if local_touch.distance_to(preview_local) <= 65.0:
+			swapped_this_touch = true
+			is_touch_aiming = false
 			game_manager.swap_bubbles()
 			return
 
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			var mouse_pos: Vector2 = get_global_mouse_position()
-			var preview_global_pos: Vector2 = to_global(Vector2(-70, 40))
-			if mouse_pos.distance_to(preview_global_pos) <= 50.0:
-				game_manager.swap_bubbles()
-				return
+		swapped_this_touch = false
+		is_touch_aiming = true
 
+	elif is_up:
+		if swapped_this_touch:
+			swapped_this_touch = false
+			is_touch_aiming = false
+			return
+
+		if is_touch_aiming:
+			is_touch_aiming = false
 			var direction: Vector2 = get_aim_direction()
 
 			can_aim = false
@@ -321,6 +352,8 @@ func _input(event: InputEvent) -> void:
 
 func enable_aim() -> void:
 	can_aim = true
+	is_touch_aiming = false
+	swapped_this_touch = false
 	$AimLine.visible = true
 	if has_node("AimArrow"):
 		$AimArrow.visible = true

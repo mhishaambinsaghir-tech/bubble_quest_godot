@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://dsgx2efyewe56"]
+[gd_scene load_steps=25 format=3 uid="uid://dsgx2efyewe56"]
 
 [ext_resource type="PackedScene" uid="uid://cdgxjdanbyl1q" path="res://scenes/bubbles/Bubble.tscn" id="1_0oucd"]
 [ext_resource type="Script" uid="uid://bsvpqkqwobj3i" path="res://scripts/launcher.gd" id="2_o48be"]
@@ -17,7 +17,11 @@
 [ext_resource type="Texture2D" uid="uid://bvvse74s5r383" path="res://assets/ui/win_panel_next_level_button.png" id="15_win_next_level"]
 [ext_resource type="Texture2D" uid="uid://bghvw7652av7m" path="res://assets/ui/win_panel_replay_button.png" id="16_win_replay"]
 [ext_resource type="Texture2D" uid="uid://bjig3u4mifj3a" path="res://assets/ui/win_panel_score_label.png" id="17_win_score_label"]
-[ext_resource type="Shader" path="res://assets/launcher/trajectory_line.gdshader" id="18_line_shader"]
+[ext_resource type="Shader" uid="uid://bdv8itq5bkiw" path="res://assets/launcher/trajectory_line.gdshader" id="18_line_shader"]
+[ext_resource type="Texture2D" uid="uid://cc75wx4qfjsk7" path="res://assets/backgrounds/loose_panel_bg.png" id="19_loose_bg"]
+[ext_resource type="Texture2D" uid="uid://dmagxm5bt7jcy" path="res://assets/ui/loose_panel_game_over_label.png" id="20_loose_title"]
+[ext_resource type="Texture2D" uid="uid://dr0yj50ghimav" path="res://assets/ui/loose_panel_retry_button.png" id="21_loose_retry"]
+[ext_resource type="Texture2D" uid="uid://bymf78t4d58i2" path="res://assets/ui/loose_panel_main_menu_button.png" id="22_loose_main_menu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8syxq"]
 size = Vector2(20, 1280)
@@ -28,13 +32,15 @@ size = Vector2(20, 1280)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o48be"]
 size = Vector2(740, 20)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_aim_line"]
+shader = ExtResource("18_line_shader")
+shader_parameter/scroll_speed = 2.5
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pause_panel"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_win_panel"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_aim_line"]
-shader = ExtResource("18_line_shader")
-shader_parameter/scroll_speed = 2.5
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lose_panel"]
 
 [node name="Game" type="Node2D"]
 
@@ -50,21 +56,20 @@ offset_bottom = 2000.0
 color = Color(0.12, 0.12, 0.14, 1)
 
 [node name="Background" type="TextureRect" parent="Playfield"]
-modulate = Color(0.55, 0.58, 0.72, 1)
+modulate = Color(0.45, 0.48, 0.62, 1)
 offset_left = -360.0
-offset_top = -640.0
+offset_top = -1400.0
 offset_right = 360.0
-offset_bottom = 640.0
+offset_bottom = 1400.0
 texture = ExtResource("7_bg")
 expand_mode = 1
-stretch_mode = 6
 
 [node name="BackgroundOverlay" type="ColorRect" parent="Playfield"]
 offset_left = -360.0
-offset_top = -640.0
+offset_top = -1400.0
 offset_right = 360.0
-offset_bottom = 640.0
-color = Color(0.03, 0.05, 0.12, 0.35)
+offset_bottom = 1400.0
+color = Color(0.03, 0.04, 0.1, 0.45)
 
 [node name="Boundaries" type="Node2D" parent="Playfield"]
 
@@ -81,7 +86,7 @@ position = Vector2(370, 0)
 shape = SubResource("RectangleShape2D_0oucd")
 
 [node name="Ceiling" type="StaticBody2D" parent="Playfield/Boundaries"]
-position = Vector2(0, -650)
+position = Vector2(0, -570)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Playfield/Boundaries/Ceiling"]
 shape = SubResource("RectangleShape2D_o48be")
@@ -90,12 +95,22 @@ shape = SubResource("RectangleShape2D_o48be")
 position = Vector2(0, 500)
 script = ExtResource("2_o48be")
 
+[node name="LauncherPedestal" type="Polygon2D" parent="Launcher"]
+z_index = -1
+color = Color(0.04, 0.06, 0.12, 0.7)
+polygon = PackedVector2Array(-115, 15, 55, 15, 55, 68, -115, 68)
+
+[node name="LauncherPedestalBorder" type="Line2D" parent="Launcher/LauncherPedestal"]
+points = PackedVector2Array(-115, 15, 55, 15, 55, 68, -115, 68, -115, 15)
+width = 3.0
+default_color = Color(0.2, 0.8, 1, 0.4)
+joint_mode = 2
+
 [node name="AimLine" type="Line2D" parent="Launcher"]
 texture_repeat = 2
 material = SubResource("ShaderMaterial_aim_line")
 points = PackedVector2Array(0, 0, 0, -300)
-width = 14.0
-default_color = Color(0.2, 0.9, 1, 0.95)
+default_color = Color(0.2, 0.9, 1, 0.55)
 texture = ExtResource("5_dot")
 texture_mode = 1
 antialiased = true
@@ -103,7 +118,7 @@ antialiased = true
 [node name="AimArrow" type="Sprite2D" parent="Launcher"]
 visible = false
 modulate = Color(0.2, 0.9, 1, 1)
-scale = Vector2(0.65, 0.65)
+scale = Vector2(0.75, 0.75)
 texture = ExtResource("6_arrow")
 offset = Vector2(0, -12)
 
@@ -111,7 +126,7 @@ offset = Vector2(0, -12)
 position = Vector2(0, 40)
 
 [node name="BubbleGrid" type="Node2D" parent="."]
-position = Vector2(-304, -608)
+position = Vector2(-304, -528)
 script = ExtResource("3_dbpbd")
 bubble_scene = ExtResource("1_0oucd")
 
@@ -129,15 +144,23 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="TopBarOverlay" type="ColorRect" parent="GameUI/HUD"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 104.0
+grow_horizontal = 2
+color = Color(0.02, 0.03, 0.08, 0.5)
+
 [node name="ScoreLabel" type="Label" parent="GameUI/HUD"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -340.0
-offset_top = 20.0
+offset_left = -330.0
+offset_top = 42.0
 offset_right = -150.0
-offset_bottom = 68.0
+offset_bottom = 86.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 0.92, 0.3, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.15, 0.95)
@@ -152,9 +175,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -140.0
-offset_top = 20.0
-offset_right = 210.0
-offset_bottom = 68.0
+offset_top = 42.0
+offset_right = 200.0
+offset_bottom = 86.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.15, 0.95)
@@ -170,9 +193,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = 220.0
-offset_top = 16.0
-offset_right = 340.0
-offset_bottom = 72.0
+offset_top = 36.0
+offset_right = 330.0
+offset_bottom = 92.0
 grow_horizontal = 2
 texture_normal = ExtResource("8_pause")
 ignore_texture_size = true
@@ -186,10 +209,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -240.0
-offset_right = 220.0
-offset_bottom = 240.0
+offset_left = -270.0
+offset_top = -350.0
+offset_right = 270.0
+offset_bottom = 350.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_pause_panel")
@@ -210,13 +233,13 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 30.0
-offset_top = 30.0
-offset_right = -30.0
-offset_bottom = -30.0
+offset_left = 35.0
+offset_top = 40.0
+offset_right = -35.0
+offset_bottom = -40.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 24
 alignment = 1
 
 [node name="PauseTitle" type="Label" parent="GameUI/HUD/PausePanel/VBoxContainer"]
@@ -224,12 +247,12 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.15, 0.95)
 theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "PAUSED"
 horizontal_alignment = 1
 
 [node name="ResumeButton" type="TextureButton" parent="GameUI/HUD/PausePanel/VBoxContainer"]
-custom_minimum_size = Vector2(240, 76)
+custom_minimum_size = Vector2(280, 88)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("10_pause_resume")
@@ -237,7 +260,7 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="RestartButton" type="TextureButton" parent="GameUI/HUD/PausePanel/VBoxContainer"]
-custom_minimum_size = Vector2(240, 76)
+custom_minimum_size = Vector2(280, 88)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("11_pause_restart")
@@ -245,7 +268,7 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="MainMenuButton" type="TextureButton" parent="GameUI/HUD/PausePanel/VBoxContainer"]
-custom_minimum_size = Vector2(240, 76)
+custom_minimum_size = Vector2(280, 88)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("12_pause_main_menu")
@@ -260,10 +283,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -260.0
-offset_right = 220.0
-offset_bottom = 260.0
+offset_left = -270.0
+offset_top = -360.0
+offset_right = 270.0
+offset_bottom = 360.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_win_panel")
@@ -284,17 +307,17 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 30.0
-offset_top = 30.0
-offset_right = -30.0
-offset_bottom = -30.0
+offset_left = 35.0
+offset_top = 40.0
+offset_right = -35.0
+offset_bottom = -40.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 22
 alignment = 1
 
 [node name="WinTitleGraphic" type="TextureRect" parent="GameUI/HUD/WinPanel/VBoxContainer"]
-custom_minimum_size = Vector2(320, 90)
+custom_minimum_size = Vector2(380, 105)
 layout_mode = 2
 size_flags_horizontal = 4
 texture = ExtResource("14_win_title")
@@ -302,7 +325,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="ScoreBanner" type="TextureRect" parent="GameUI/HUD/WinPanel/VBoxContainer"]
-custom_minimum_size = Vector2(260, 60)
+custom_minimum_size = Vector2(400, 92)
 layout_mode = 2
 size_flags_horizontal = 4
 texture = ExtResource("17_win_score_label")
@@ -319,13 +342,13 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.95, 0.3, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.15, 0.95)
 theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 34
 text = "SCORE: 0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="NextLevelButton" type="TextureButton" parent="GameUI/HUD/WinPanel/VBoxContainer"]
-custom_minimum_size = Vector2(240, 76)
+custom_minimum_size = Vector2(280, 88)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("15_win_next_level")
@@ -333,7 +356,7 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="ReplayButton" type="TextureButton" parent="GameUI/HUD/WinPanel/VBoxContainer"]
-custom_minimum_size = Vector2(240, 76)
+custom_minimum_size = Vector2(280, 88)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("16_win_replay")
@@ -348,37 +371,62 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -200.0
-offset_right = 200.0
-offset_bottom = 200.0
+offset_left = -270.0
+offset_top = -350.0
+offset_right = 270.0
+offset_bottom = 350.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_lose_panel")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="GameUI/HUD/LosePanel"]
+[node name="Background" type="TextureRect" parent="GameUI/HUD/LosePanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("19_loose_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GameUI/HUD/LosePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 35.0
+offset_top = 40.0
+offset_right = -35.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 26
 alignment = 1
 
-[node name="LoseTitle" type="Label" parent="GameUI/HUD/LosePanel/VBoxContainer"]
+[node name="LoseTitleGraphic" type="TextureRect" parent="GameUI/HUD/LosePanel/VBoxContainer"]
+custom_minimum_size = Vector2(380, 105)
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
-text = "GAME OVER"
-horizontal_alignment = 1
+size_flags_horizontal = 4
+texture = ExtResource("20_loose_title")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="RetryButton" type="Button" parent="GameUI/HUD/LosePanel/VBoxContainer"]
+[node name="RetryButton" type="TextureButton" parent="GameUI/HUD/LosePanel/VBoxContainer"]
+custom_minimum_size = Vector2(280, 88)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "RETRY"
+size_flags_horizontal = 4
+texture_normal = ExtResource("21_loose_retry")
+ignore_texture_size = true
+stretch_mode = 5
 
-[node name="MainMenuButton" type="Button" parent="GameUI/HUD/LosePanel/VBoxContainer"]
+[node name="MainMenuButton" type="TextureButton" parent="GameUI/HUD/LosePanel/VBoxContainer"]
+custom_minimum_size = Vector2(280, 88)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "MAIN MENU"
+size_flags_horizontal = 4
+texture_normal = ExtResource("22_loose_main_menu")
+ignore_texture_size = true
+stretch_mode = 5
 
 [node name="FinalVictoryPanel" type="Panel" parent="GameUI/HUD"]
 visible = false
@@ -388,10 +436,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -200.0
-offset_right = 220.0
-offset_bottom = 200.0
+offset_left = -260.0
+offset_top = -250.0
+offset_right = 260.0
+offset_bottom = 250.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -406,17 +454,19 @@ alignment = 1
 
 [node name="VictoryTitle" type="Label" parent="GameUI/HUD/FinalVictoryPanel/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 36
 text = "BUBBLE QUEST COMPLETE!"
 horizontal_alignment = 1
 
 [node name="VictoryScoreLabel" type="Label" parent="GameUI/HUD/FinalVictoryPanel/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 32
 text = "FINAL SCORE: 0"
 horizontal_alignment = 1
 
 [node name="MainMenuButton" type="Button" parent="GameUI/HUD/FinalVictoryPanel/VBoxContainer"]
+custom_minimum_size = Vector2(240, 64)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 28
 text = "MAIN MENU"

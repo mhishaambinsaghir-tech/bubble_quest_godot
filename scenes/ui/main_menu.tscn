@@ -52,7 +52,7 @@ func _on_play_pressed() -> void:
 	var gm = load(\"res://scripts/game_manager.gd\")
 	if gm != null:
 		gm.load_save_data()
-		gm.selected_level_index = 0
+		gm.selected_level_index = gm.highest_unlocked_level
 	get_tree().change_scene_to_file(\"res://scenes/gameplay/Scene_Gameplay.tscn\")
 
 func _on_level_select_pressed() -> void:

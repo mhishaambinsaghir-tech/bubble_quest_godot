@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://b7bhsrrvqb2q0"]
 
-[ext_resource type="Texture2D" path="res://assets/backgrounds/levels_bg.jpg" id="1_bg"]
+[ext_resource type="Texture2D" uid="uid://0duds6ecvyds" path="res://assets/backgrounds/levels_bg.jpg" id="1_bg"]
 
 [sub_resource type="GDScript" id="GDScript_level_select"]
 script/source = "extends Control
@@ -71,13 +71,13 @@ func _on_back_pressed() -> void:
 "
 
 [node name="LevelSelect" type="Control"]
-script = SubResource("GDScript_level_select")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = SubResource("GDScript_level_select")
 
 [node name="OuterBackdrop" type="ColorRect" parent="."]
 layout_mode = 1

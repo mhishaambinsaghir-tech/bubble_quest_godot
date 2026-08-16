@@ -215,13 +215,13 @@ func update_next_bubble_preview() -> void:
 		var label = Label.new()
 		label.name = "NextBubbleLabel"
 		label.text = "SWAP"
-		label.position = Vector2(-95, 68)
-		label.size = Vector2(50, 20)
+		label.position = Vector2(-95, 62)
+		label.size = Vector2(50, 18)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.add_theme_font_size_override("font_size", 11)
-		label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.75))
-		label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
-		label.add_theme_constant_override("outline_size", 4)
+		label.add_theme_font_size_override("font_size", 10)
+		label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.65))
+		label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.8))
+		label.add_theme_constant_override("outline_size", 3)
 		launcher.add_child(label)
 
 func swap_bubbles() -> void:
