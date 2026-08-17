@@ -203,22 +203,12 @@ var next_bubble_preview_node: Sprite2D = null
 func update_next_bubble_preview() -> void:
 	if next_bubble_type >= 0:
 		var tex = BubbleTypes.get_texture(next_bubble_type)
-		if tex != null:
-			if next_bubble_icon != null:
-				next_bubble_icon.texture = tex
+		if tex != null and next_bubble_icon != null:
+			next_bubble_icon.texture = tex
 
-			if launcher != null:
-				if next_bubble_preview_node == null or not is_instance_valid(next_bubble_preview_node):
-					next_bubble_preview_node = Sprite2D.new()
-					next_bubble_preview_node.position = Vector2(-115, 62)
-					next_bubble_preview_node.z_index = 2
-					launcher.add_child(next_bubble_preview_node)
-
-				next_bubble_preview_node.texture = tex
-				var tex_size = tex.get_size()
-				if tex_size.x > 0 and tex_size.y > 0:
-					var scale_factor = 44.0 / max(tex_size.x, tex_size.y)
-					next_bubble_preview_node.scale = Vector2(scale_factor, scale_factor)
+	if next_bubble_preview_node != null and is_instance_valid(next_bubble_preview_node):
+		next_bubble_preview_node.queue_free()
+		next_bubble_preview_node = null
 
 	if launcher != null and launcher.has_node("NextBubbleLabel"):
 		launcher.get_node("NextBubbleLabel").queue_free()
@@ -233,6 +223,11 @@ func swap_bubbles() -> void:
 	if next_bubble_type < 0:
 		return
 
+	get_viewport().set_input_as_handled()
+	if launcher != null:
+		launcher.is_touch_aiming = false
+		launcher.is_dragging = false
+
 	var old_current_type: int = current_bubble.bubble_type
 	var old_next_type: int = next_bubble_type
 
@@ -246,12 +241,6 @@ func swap_bubbles() -> void:
 		var tw_current = current_bubble.create_tween()
 		tw_current.tween_property(current_bubble, "scale", Vector2(1.2, 1.2), 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tw_current.tween_property(current_bubble, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-
-	if next_bubble_preview_node != null and is_instance_valid(next_bubble_preview_node):
-		var base_scale = next_bubble_preview_node.scale
-		var tw_preview = next_bubble_preview_node.create_tween()
-		tw_preview.tween_property(next_bubble_preview_node, "scale", base_scale * 1.25, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tw_preview.tween_property(next_bubble_preview_node, "scale", base_scale, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
 	if swap_button != null:
 		var tw_swap = swap_button.create_tween()

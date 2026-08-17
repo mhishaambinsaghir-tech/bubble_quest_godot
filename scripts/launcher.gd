@@ -81,7 +81,7 @@ func _process(delta: float) -> void:
 	update_aim_line(direction)
 	animate_aim_effects(delta)
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if not can_aim:
 		return
 
