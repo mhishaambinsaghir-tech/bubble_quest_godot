@@ -70,9 +70,11 @@ static func record_level_completion(level_index: int, final_score: int) -> void:
 
 @onready var game_ui = $"../GameUI"
 @onready var hud = $"../GameUI/HUD"
-@onready var score_label = $"../GameUI/HUD/ScoreLabel"
-@onready var level_label = $"../GameUI/HUD/LevelLabel"
+@onready var score_label = $"../GameUI/HUD/ScoreBadge/ScoreLabel" if has_node("../GameUI/HUD/ScoreBadge/ScoreLabel") else $"../GameUI/HUD/ScoreLabel"
+@onready var level_label = $"../GameUI/HUD/StageBadge/LevelLabel" if has_node("../GameUI/HUD/StageBadge/LevelLabel") else $"../GameUI/HUD/LevelLabel"
 @onready var pause_button = $"../GameUI/HUD/PauseButton"
+@onready var swap_button = $"../GameUI/HUD/SwapButton" if has_node("../GameUI/HUD/SwapButton") else null
+@onready var next_bubble_icon = $"../GameUI/HUD/SwapButton/NextBubbleIcon" if has_node("../GameUI/HUD/SwapButton/NextBubbleIcon") else null
 
 @onready var pause_panel = $"../GameUI/HUD/PausePanel"
 @onready var resume_button = $"../GameUI/HUD/PausePanel/VBoxContainer/ResumeButton"
@@ -113,11 +115,12 @@ func _ready() -> void:
 	load_save_data()
 
 	if levels.is_empty():
-		for i in range(1, 11):
+		for i in range(1, 201):
 			var path: String = "res://data/levels/level_%02d.tres" % i
-			var lvl = load(path)
-			if lvl != null:
-				levels.append(lvl)
+			if ResourceLoader.exists(path):
+				var lvl = load(path)
+				if lvl != null:
+					levels.append(lvl)
 
 	bubble_scene = preload(
 		"res://scenes/bubbles/Bubble.tscn"
@@ -156,7 +159,7 @@ func setup_ui() -> void:
 		game_ui.process_mode = Node.PROCESS_MODE_ALWAYS
 
 	var all_buttons = [
-		pause_button, resume_button, pause_restart_button, pause_main_menu_button,
+		pause_button, swap_button, resume_button, pause_restart_button, pause_main_menu_button,
 		next_level_button, replay_button, retry_button, lose_main_menu_button,
 		victory_main_menu_button
 	]
@@ -166,6 +169,9 @@ func setup_ui() -> void:
 
 	if pause_button != null:
 		pause_button.pressed.connect(_on_pause_pressed)
+
+	if swap_button != null:
+		swap_button.pressed.connect(swap_bubbles)
 
 	if resume_button != null:
 		resume_button.pressed.connect(_on_resume_pressed)
@@ -195,34 +201,27 @@ var next_bubble_type: int = -1
 var next_bubble_preview_node: Sprite2D = null
 
 func update_next_bubble_preview() -> void:
-	if launcher == null:
-		return
-	if next_bubble_preview_node == null or not is_instance_valid(next_bubble_preview_node):
-		next_bubble_preview_node = Sprite2D.new()
-		next_bubble_preview_node.position = Vector2(-70, 40)
-		launcher.add_child(next_bubble_preview_node)
-
 	if next_bubble_type >= 0:
 		var tex = BubbleTypes.get_texture(next_bubble_type)
 		if tex != null:
-			next_bubble_preview_node.texture = tex
-			var tex_size = tex.get_size()
-			if tex_size.x > 0 and tex_size.y > 0:
-				var scale_factor = 48.0 / max(tex_size.x, tex_size.y)
-				next_bubble_preview_node.scale = Vector2(scale_factor, scale_factor)
+			if next_bubble_icon != null:
+				next_bubble_icon.texture = tex
 
-	if not launcher.has_node("NextBubbleLabel"):
-		var label = Label.new()
-		label.name = "NextBubbleLabel"
-		label.text = "SWAP"
-		label.position = Vector2(-95, 62)
-		label.size = Vector2(50, 18)
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.add_theme_font_size_override("font_size", 10)
-		label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.65))
-		label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.8))
-		label.add_theme_constant_override("outline_size", 3)
-		launcher.add_child(label)
+			if launcher != null:
+				if next_bubble_preview_node == null or not is_instance_valid(next_bubble_preview_node):
+					next_bubble_preview_node = Sprite2D.new()
+					next_bubble_preview_node.position = Vector2(-115, 62)
+					next_bubble_preview_node.z_index = 2
+					launcher.add_child(next_bubble_preview_node)
+
+				next_bubble_preview_node.texture = tex
+				var tex_size = tex.get_size()
+				if tex_size.x > 0 and tex_size.y > 0:
+					var scale_factor = 44.0 / max(tex_size.x, tex_size.y)
+					next_bubble_preview_node.scale = Vector2(scale_factor, scale_factor)
+
+	if launcher != null and launcher.has_node("NextBubbleLabel"):
+		launcher.get_node("NextBubbleLabel").queue_free()
 
 func swap_bubbles() -> void:
 	if game_state != GameState.PLAYING:
@@ -254,6 +253,11 @@ func swap_bubbles() -> void:
 		tw_preview.tween_property(next_bubble_preview_node, "scale", base_scale * 1.25, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tw_preview.tween_property(next_bubble_preview_node, "scale", base_scale, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
+	if swap_button != null:
+		var tw_swap = swap_button.create_tween()
+		tw_swap.tween_property(swap_button, "scale", Vector2(1.15, 1.15), 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw_swap.tween_property(swap_button, "scale", Vector2(1.0, 1.0), 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
 func start_game() -> void:
 	current_level_index = selected_level_index
 	load_active_level()
@@ -261,6 +265,7 @@ func start_game() -> void:
 func load_active_level() -> void:
 	get_tree().paused = false
 	game_state = GameState.PLAYING
+	score = 0
 	next_bubble_type = -1
 
 	if pause_panel != null: pause_panel.visible = false
@@ -281,13 +286,23 @@ func load_active_level() -> void:
 		bubble_grid.load_level(active_level_data)
 
 	if level_label != null:
+		var raw_name: String = ""
 		if active_level_data != null and active_level_data.level_name != "":
-			level_label.text = active_level_data.level_name.to_upper()
+			raw_name = active_level_data.level_name.to_upper()
 		else:
-			level_label.text = "LEVEL " + str(current_level_index + 1)
+			raw_name = "LEVEL " + str(current_level_index + 1)
+
+		if " - " in raw_name:
+			level_label.text = raw_name.replace(" - ", "\n")
+		else:
+			level_label.text = raw_name
 
 	if score_label != null:
-		score_label.text = "Score: " + str(score)
+		score_label.text = str(score)
+
+	# Dynamic Difficulty Scaling: Slightly increase bubble speed every 10 levels
+	var level_tier: int = current_level_index / 10
+	bubble_speed = min(1600.0 + level_tier * 40.0, max_bubble_speed)
 
 	spawn_current_bubble()
 	enable_shooting()
@@ -304,7 +319,7 @@ func add_score(points: int) -> void:
 	score += points
 
 	if score_label != null:
-		score_label.text = "Score: " + str(score)
+		score_label.text = str(score)
 
 func get_random_bubble_type() -> int:
 	var bubble_grid = get_tree().current_scene.get_node("BubbleGrid")
@@ -346,6 +361,7 @@ func spawn_current_bubble() -> void:
 	current_bubble.set_bubble_type(bubble_type)
 
 	current_bubble.global_position = bubble_spawn_point.global_position
+	current_bubble.z_index = 2
 
 	get_tree().current_scene.add_child(current_bubble)
 
@@ -403,7 +419,7 @@ func win_game() -> void:
 
 	record_level_completion(current_level_index, score)
 
-	if current_level_index >= levels.size() - 1:
+	if current_level_index >= 199:
 		print("ALL LEVELS COMPLETED! FINAL VICTORY!")
 		if final_victory_panel != null:
 			if victory_score_label != null:
@@ -459,7 +475,7 @@ func _on_main_menu_pressed() -> void:
 func _on_next_level_pressed() -> void:
 	if win_panel != null:
 		win_panel.visible = false
-	if current_level_index < levels.size() - 1:
+	if current_level_index < 199:
 		current_level_index += 1
 		selected_level_index = current_level_index
 		load_active_level()

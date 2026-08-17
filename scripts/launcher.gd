@@ -48,14 +48,100 @@ func _ready() -> void:
 	if has_node("AimLine"):
 		$AimLine.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 
+	if has_node("LauncherBase"):
+		var base = get_node("LauncherBase") as Sprite2D
+		if base != null:
+			base.z_index = 1
+			if base.texture == null or not base.texture.resource_path.ends_with("launcher_cannon.png"):
+				var cannon_tex = load("res://assets/launcher/launcher_cannon.png")
+				if cannon_tex != null:
+					base.texture = cannon_tex
+
+var current_aim_angle: float = deg_to_rad(-90.0)
+var touch_start_pos: Vector2 = Vector2.ZERO
+var is_touch_aiming: bool = false
+var is_dragging: bool = false
+const DEADZONE_SQ: float = 64.0 # 8px deadzone squared
+
 func _process(delta: float) -> void:
 	if not can_aim:
 		return
 
-	var direction: Vector2 = get_aim_direction()
+	var raw_direction: Vector2 = get_aim_direction()
+	var raw_angle: float = raw_direction.angle()
+
+	if is_touch_aiming and is_dragging:
+		current_aim_angle = lerp_angle(current_aim_angle, raw_angle, delta * 30.0)
+	else:
+		current_aim_angle = raw_angle
+
+	current_aim_angle = clamp(current_aim_angle, min_aim_angle, max_aim_angle)
+	var direction: Vector2 = Vector2.from_angle(current_aim_angle).normalized()
 
 	update_aim_line(direction)
 	animate_aim_effects(delta)
+
+func _input(event: InputEvent) -> void:
+	if not can_aim:
+		return
+
+	# Ignore inputs already handled by UI controls (like Pause and Swap buttons)
+	if get_viewport().is_input_handled():
+		return
+
+	# Right-click instantly swaps bubbles on desktop
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		game_manager.swap_bubbles()
+		return
+
+	var is_down: bool = false
+	var is_up: bool = false
+	var event_pos: Vector2 = Vector2.ZERO
+
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		is_down = event.pressed
+		is_up = not event.pressed
+		event_pos = event.position
+	elif event is InputEventScreenTouch:
+		is_down = event.pressed
+		is_up = not event.pressed
+		event_pos = event.position
+	elif (event is InputEventMouseMotion or event is InputEventScreenDrag) and is_touch_aiming:
+		var pos = event.position
+		if touch_start_pos.distance_squared_to(pos) >= DEADZONE_SQ:
+			is_dragging = true
+
+	if is_down:
+		is_touch_aiming = true
+		touch_start_pos = event_pos
+		is_dragging = false
+
+	elif is_up:
+		if is_touch_aiming:
+			is_touch_aiming = false
+			is_dragging = false
+
+			current_aim_angle = clamp(current_aim_angle, min_aim_angle, max_aim_angle)
+			var direction: Vector2 = Vector2.from_angle(current_aim_angle).normalized()
+
+			can_aim = false
+			$AimLine.visible = false
+			if has_node("AimArrow"):
+				$AimArrow.visible = false
+			if has_node("ImpactRing"):
+				$ImpactRing.visible = false
+
+			game_manager.shoot_current_bubble(direction)
+
+func enable_aim() -> void:
+	can_aim = true
+	is_touch_aiming = false
+	is_dragging = false
+	$AimLine.visible = true
+	if has_node("AimArrow"):
+		$AimArrow.visible = true
+	if has_node("ImpactRing"):
+		$ImpactRing.visible = true
 
 func animate_aim_effects(delta: float) -> void:
 	anim_time += delta
@@ -79,6 +165,11 @@ func animate_aim_effects(delta: float) -> void:
 	if has_node("AimArrow") and $AimArrow.visible:
 		var pulse = 0.75 + sin(anim_time * 6.0) * 0.06
 		$AimArrow.scale = Vector2(pulse, pulse)
+
+	if has_node("ImpactRing") and $ImpactRing.visible:
+		$ImpactRing.rotation += delta * 2.5
+		var ring_pulse = 1.0 + sin(anim_time * 8.0) * 0.12
+		$ImpactRing.scale = Vector2(ring_pulse, ring_pulse)
 
 func update_aim_line(direction: Vector2) -> void:
 	if is_vec_invalid(direction) or direction.length_squared() < 0.0001:
@@ -220,6 +311,14 @@ func update_aim_line(direction: Vector2) -> void:
 		else:
 			arrow.visible = false
 
+	if has_node("ImpactRing"):
+		var impact = $ImpactRing
+		if line_points.size() >= 1:
+			impact.position = line_points[line_points.size() - 1]
+			impact.visible = can_aim
+		else:
+			impact.visible = false
+
 func find_bubble_collision(
 	start_position: Vector2,
 	direction: Vector2,
@@ -297,63 +396,3 @@ func find_bubble_collision(
 			closest_distance = collision_distance
 
 	return closest_distance
-
-var is_touch_aiming: bool = false
-var swapped_this_touch: bool = false
-
-func _input(event: InputEvent) -> void:
-	if not can_aim:
-		return
-
-	# Right-click instantly swaps bubbles
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-		game_manager.swap_bubbles()
-		return
-
-	var is_down: bool = false
-	var is_up: bool = false
-
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		is_down = event.pressed
-		is_up = not event.pressed
-	elif event is InputEventScreenTouch:
-		is_down = event.pressed
-		is_up = not event.pressed
-
-	if is_down:
-		var local_touch: Vector2 = to_local(get_global_mouse_position())
-		var preview_local: Vector2 = Vector2(-70, 40)
-
-		if local_touch.distance_to(preview_local) <= 65.0:
-			swapped_this_touch = true
-			is_touch_aiming = false
-			game_manager.swap_bubbles()
-			return
-
-		swapped_this_touch = false
-		is_touch_aiming = true
-
-	elif is_up:
-		if swapped_this_touch:
-			swapped_this_touch = false
-			is_touch_aiming = false
-			return
-
-		if is_touch_aiming:
-			is_touch_aiming = false
-			var direction: Vector2 = get_aim_direction()
-
-			can_aim = false
-			$AimLine.visible = false
-			if has_node("AimArrow"):
-				$AimArrow.visible = false
-
-			game_manager.shoot_current_bubble(direction)
-
-func enable_aim() -> void:
-	can_aim = true
-	is_touch_aiming = false
-	swapped_this_touch = false
-	$AimLine.visible = true
-	if has_node("AimArrow"):
-		$AimArrow.visible = true

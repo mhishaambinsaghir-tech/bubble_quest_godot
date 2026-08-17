@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://dsgx2efyewe56"]
+[gd_scene load_steps=29 format=3 uid="uid://dsgx2efyewe56"]
 
 [ext_resource type="PackedScene" uid="uid://cdgxjdanbyl1q" path="res://scenes/bubbles/Bubble.tscn" id="1_0oucd"]
 [ext_resource type="Script" uid="uid://bsvpqkqwobj3i" path="res://scripts/launcher.gd" id="2_o48be"]
@@ -22,6 +22,10 @@
 [ext_resource type="Texture2D" uid="uid://dmagxm5bt7jcy" path="res://assets/ui/loose_panel_game_over_label.png" id="20_loose_title"]
 [ext_resource type="Texture2D" uid="uid://dr0yj50ghimav" path="res://assets/ui/loose_panel_retry_button.png" id="21_loose_retry"]
 [ext_resource type="Texture2D" uid="uid://bymf78t4d58i2" path="res://assets/ui/loose_panel_main_menu_button.png" id="22_loose_main_menu"]
+[ext_resource type="Texture2D" uid="uid://bxpyatn4xwq3h" path="res://assets/launcher/launcher_cannon.png" id="23_launcher_base"]
+[ext_resource type="Texture2D" uid="uid://xgkqpwlennfm" path="res://assets/ui/swap_button.png" id="24_swap_button"]
+[ext_resource type="Texture2D" uid="uid://c1remqlrxxnvl" path="res://assets/ui/score_badge.png" id="25_score_badge"]
+[ext_resource type="Texture2D" uid="uid://b7pgubp0gc6ap" path="res://assets/ui/stage_badge.png" id="26_stage_badge"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8syxq"]
 size = Vector2(20, 1280)
@@ -56,7 +60,6 @@ offset_bottom = 2000.0
 color = Color(0.12, 0.12, 0.14, 1)
 
 [node name="Background" type="TextureRect" parent="Playfield"]
-modulate = Color(0.45, 0.48, 0.62, 1)
 offset_left = -360.0
 offset_top = -1400.0
 offset_right = 360.0
@@ -64,12 +67,20 @@ offset_bottom = 1400.0
 texture = ExtResource("7_bg")
 expand_mode = 1
 
-[node name="BackgroundOverlay" type="ColorRect" parent="Playfield"]
-offset_left = -360.0
-offset_top = -1400.0
-offset_right = 360.0
-offset_bottom = 1400.0
-color = Color(0.03, 0.04, 0.1, 0.45)
+[node name="AmbientParticles" type="CPUParticles2D" parent="Playfield"]
+amount = 24
+lifetime = 6.0
+preprocess = 3.0
+emission_shape = 3
+emission_rect_extents = Vector2(360, 640)
+direction = Vector2(0, -1)
+spread = 30.0
+gravity = Vector2(0, -10)
+initial_velocity_min = 15.0
+initial_velocity_max = 35.0
+scale_amount_min = 2.0
+scale_amount_max = 5.0
+color = Color(0.4, 0.9, 1.0, 0.45)
 
 [node name="Boundaries" type="Node2D" parent="Playfield"]
 
@@ -86,33 +97,32 @@ position = Vector2(370, 0)
 shape = SubResource("RectangleShape2D_0oucd")
 
 [node name="Ceiling" type="StaticBody2D" parent="Playfield/Boundaries"]
-position = Vector2(0, -570)
+position = Vector2(0, -490)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Playfield/Boundaries/Ceiling"]
 shape = SubResource("RectangleShape2D_o48be")
 
 [node name="Launcher" type="Node2D" parent="."]
-position = Vector2(0, 500)
+position = Vector2(0, 480)
 script = ExtResource("2_o48be")
 
-[node name="LauncherPedestal" type="Polygon2D" parent="Launcher"]
-z_index = -1
-color = Color(0.04, 0.06, 0.12, 0.7)
-polygon = PackedVector2Array(-115, 15, 55, 15, 55, 68, -115, 68)
-
-[node name="LauncherPedestalBorder" type="Line2D" parent="Launcher/LauncherPedestal"]
-points = PackedVector2Array(-115, 15, 55, 15, 55, 68, -115, 68, -115, 15)
-width = 3.0
-default_color = Color(0.2, 0.8, 1, 0.4)
-joint_mode = 2
+[node name="LauncherBase" type="Sprite2D" parent="Launcher"]
+z_index = 1
+position = Vector2(0, 18)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("23_launcher_base")
 
 [node name="AimLine" type="Line2D" parent="Launcher"]
 texture_repeat = 2
 material = SubResource("ShaderMaterial_aim_line")
 points = PackedVector2Array(0, 0, 0, -300)
-default_color = Color(0.2, 0.9, 1, 0.55)
+width = 22.0
+default_color = Color(0.3, 0.92, 1.0, 0.65)
 texture = ExtResource("5_dot")
 texture_mode = 1
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
 antialiased = true
 
 [node name="AimArrow" type="Sprite2D" parent="Launcher"]
@@ -122,11 +132,21 @@ scale = Vector2(0.75, 0.75)
 texture = ExtResource("6_arrow")
 offset = Vector2(0, -12)
 
+[node name="ImpactRing" type="Line2D" parent="Launcher"]
+visible = false
+z_index = 2
+points = PackedVector2Array(20, 0, 18.5, 7.6, 14.1, 14.1, 7.6, 18.5, 0, 20, -7.6, 18.5, -14.1, 14.1, -18.5, 7.6, -20, 0, -18.5, -7.6, -14.1, -14.1, -7.6, -18.5, 0, -20, 7.6, -18.5, 14.1, -14.1, 18.5, -7.6, 20, 0)
+width = 3.5
+default_color = Color(0.35, 0.95, 1.0, 0.85)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
 [node name="BubbleSpawnPoint" type="Marker2D" parent="Launcher"]
-position = Vector2(0, 40)
+position = Vector2(0, -25)
 
 [node name="BubbleGrid" type="Node2D" parent="."]
-position = Vector2(-304, -528)
+position = Vector2(-304, -448)
 script = ExtResource("3_dbpbd")
 bubble_scene = ExtResource("1_0oucd")
 
@@ -144,45 +164,78 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TopBarOverlay" type="ColorRect" parent="GameUI/HUD"]
+[node name="AimTouchArea" type="Control" parent="GameUI/HUD"]
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 15
 anchor_right = 1.0
-offset_bottom = 104.0
+anchor_bottom = 1.0
+offset_top = 380.0
 grow_horizontal = 2
-color = Color(0.02, 0.03, 0.08, 0.5)
+grow_vertical = 2
+mouse_filter = 0
 
-[node name="ScoreLabel" type="Label" parent="GameUI/HUD"]
+[node name="ScoreBadge" type="TextureRect" parent="GameUI/HUD"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -330.0
-offset_top = 42.0
-offset_right = -150.0
-offset_bottom = 86.0
+offset_left = -340.0
+offset_top = 20.0
+offset_right = -130.0
+offset_bottom = 100.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 0.92, 0.3, 1)
-theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.15, 0.95)
+texture = ExtResource("25_score_badge")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ScoreLabel" type="Label" parent="GameUI/HUD/ScoreBadge"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 0.0
+offset_right = -12.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.2, 0.95)
 theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 28
-text = "Score: 0"
+theme_override_font_sizes/font_size = 24
+text = "0"
+horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LevelLabel" type="Label" parent="GameUI/HUD"]
+[node name="StageBadge" type="TextureRect" parent="GameUI/HUD"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -140.0
-offset_top = 42.0
-offset_right = 200.0
-offset_bottom = 86.0
+offset_left = -115.0
+offset_top = 16.0
+offset_right = 195.0
+offset_bottom = 104.0
 grow_horizontal = 2
+texture = ExtResource("26_stage_badge")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LevelLabel" type="Label" parent="GameUI/HUD/StageBadge"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 15.0
+offset_top = 6.0
+offset_right = -15.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.15, 0.95)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.2, 0.95)
 theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 15
 text = "LEVEL 1"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -193,13 +246,47 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = 220.0
-offset_top = 36.0
+offset_top = 20.0
 offset_right = 330.0
-offset_bottom = 92.0
+offset_bottom = 100.0
 grow_horizontal = 2
 texture_normal = ExtResource("8_pause")
 ignore_texture_size = true
 stretch_mode = 5
+
+[node name="SwapButton" type="TextureButton" parent="GameUI/HUD"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -140.0
+offset_right = -70.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+texture_normal = ExtResource("24_swap_button")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="NextBubbleIcon" type="TextureRect" parent="GameUI/HUD/SwapButton"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
 
 [node name="PausePanel" type="Panel" parent="GameUI/HUD"]
 visible = false

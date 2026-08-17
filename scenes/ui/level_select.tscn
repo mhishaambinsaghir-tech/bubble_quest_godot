@@ -1,64 +1,122 @@
 [gd_scene load_steps=3 format=3 uid="uid://b7bhsrrvqb2q0"]
 
-[ext_resource type="Texture2D" uid="uid://0duds6ecvyds" path="res://assets/backgrounds/levels_bg.jpg" id="1_bg"]
+[ext_resource type="Texture2D" uid="uid://ny273q7jji8e" path="res://assets/backgrounds/levels_select_world1_bg.jpg" id="1_bg"]
 
 [sub_resource type="GDScript" id="GDScript_level_select"]
 script/source = "extends Control
+
+const WORLD_BACKGROUNDS: Array[String] = [
+	\"res://assets/backgrounds/levels_select_world1_bg.jpg\",
+	\"res://assets/backgrounds/levels_select_world2_bg.jpg\",
+	\"res://assets/backgrounds/levels_select_world3_bg.jpg\",
+	\"res://assets/backgrounds/levels_select_world4_bg.jpg\"
+]
+
+const TOTAL_WORLDS: int = 4
+const LEVELS_PER_WORLD: int = 50
+
+var current_world_index: int = 0
+var highest_unlocked_level: int = 0
+var best_scores: Dictionary = {}
 
 func _ready() -> void:
 	var gm = load(\"res://scripts/game_manager.gd\")
 	if gm != null:
 		gm.load_save_data()
+		highest_unlocked_level = gm.highest_unlocked_level
+		best_scores = gm.best_scores
 
-	var highest_unlocked = gm.highest_unlocked_level if gm != null else 0
-	var scores = gm.best_scores if gm != null else {}
+	current_world_index = clampi(highest_unlocked_level / LEVELS_PER_WORLD, 0, TOTAL_WORLDS - 1)
 
-	var level_grid = $MobileViewport/CenterContainer/VBoxContainer/LevelGrid
-	for i in range(1, 11):
-		var btn = level_grid.get_node_or_null(\"Level\" + str(i) + \"Button\")
-		if btn != null:
-			var idx = i - 1
-			var is_unlocked = (idx <= highest_unlocked)
+	var prev_btn = get_node_or_null(\"MobileViewport/CenterContainer/VBoxContainer/WorldNavContainer/PrevWorldButton\")
+	var next_btn = get_node_or_null(\"MobileViewport/CenterContainer/VBoxContainer/WorldNavContainer/NextWorldButton\")
+	var back_btn = get_node_or_null(\"MobileViewport/CenterContainer/VBoxContainer/BackButton\")
 
-			if is_unlocked:
-				btn.disabled = false
-				setup_button(btn)
-				var str_idx = str(idx)
-				if scores.has(str_idx):
-					btn.text = \"LEVEL \" + str(i) + \"\\nBest: \" + str(scores[str_idx])
-				else:
-					btn.text = \"LEVEL \" + str(i)
-				btn.pressed.connect(func(): _on_level_selected(idx))
-			else:
-				btn.disabled = true
-				btn.text = \"LEVEL \" + str(i) + \"\\n(LOCKED)\"
+	if prev_btn != null:
+		setup_button(prev_btn)
+		prev_btn.pressed.connect(_on_prev_world_pressed)
 
-	var back_btn = $MobileViewport/CenterContainer/VBoxContainer/BackButton
+	if next_btn != null:
+		setup_button(next_btn)
+		next_btn.pressed.connect(_on_next_world_pressed)
+
 	if back_btn != null:
 		setup_button(back_btn)
 		back_btn.pressed.connect(_on_back_pressed)
 
+	render_current_world()
+
+func render_current_world() -> void:
+	var bg_rect = get_node_or_null(\"MobileViewport/Background\")
+	if bg_rect != null:
+		var bg_path = WORLD_BACKGROUNDS[current_world_index]
+		if ResourceLoader.exists(bg_path):
+			bg_rect.texture = load(bg_path)
+		else:
+			bg_rect.texture = load(WORLD_BACKGROUNDS[0])
+
+	var world_label = get_node_or_null(\"MobileViewport/CenterContainer/VBoxContainer/WorldNavContainer/WorldTitleLabel\")
+	if world_label != null:
+		world_label.text = \"WORLD \" + str(current_world_index + 1)
+
+	var prev_btn = get_node_or_null(\"MobileViewport/CenterContainer/VBoxContainer/WorldNavContainer/PrevWorldButton\")
+	var next_btn = get_node_or_null(\"MobileViewport/CenterContainer/VBoxContainer/WorldNavContainer/NextWorldButton\")
+
+	if prev_btn != null:
+		prev_btn.disabled = (current_world_index <= 0)
+
+	if next_btn != null:
+		next_btn.disabled = (current_world_index >= TOTAL_WORLDS - 1)
+
+	var level_grid = get_node_or_null(\"MobileViewport/CenterContainer/VBoxContainer/LevelGrid\")
+	if level_grid != null:
+		var base_level_idx: int = current_world_index * LEVELS_PER_WORLD
+		for slot_idx in range(LEVELS_PER_WORLD):
+			var btn = level_grid.get_node_or_null(\"Level\" + str(slot_idx + 1) + \"Button\")
+			if btn == null:
+				continue
+
+			var abs_level_idx: int = base_level_idx + slot_idx
+			var abs_level_num: int = abs_level_idx + 1
+			var is_unlocked: bool = (abs_level_idx <= highest_unlocked_level)
+
+			var connections = btn.pressed.get_connections()
+			for conn in connections:
+				btn.pressed.disconnect(conn.callable)
+
+			if is_unlocked:
+				btn.disabled = false
+				setup_button(btn)
+				var str_idx = str(abs_level_idx)
+				if best_scores.has(str_idx):
+					btn.text = str(abs_level_num) + \"\\n★ \" + str(best_scores[str_idx])
+				else:
+					btn.text = str(abs_level_num)
+				var target_idx = abs_level_idx
+				btn.pressed.connect(func(): _on_level_selected(target_idx))
+			else:
+				btn.disabled = true
+				btn.text = str(abs_level_num) + \"\\n🔒\"
+
 func setup_button(btn: Button) -> void:
 	if btn == null: return
 	btn.pivot_offset = btn.size / 2.0
-	btn.resized.connect(func(): btn.pivot_offset = btn.size / 2.0)
-	btn.mouse_entered.connect(func():
-		var tw = btn.create_tween()
-		tw.tween_property(btn, \"scale\", Vector2(1.06, 1.06), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	)
-	btn.mouse_exited.connect(func():
-		var tw = btn.create_tween()
-		tw.tween_property(btn, \"scale\", Vector2(1.0, 1.0), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-	)
-	btn.button_down.connect(func():
-		var tw = btn.create_tween()
-		tw.tween_property(btn, \"scale\", Vector2(0.95, 0.95), 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	)
-	btn.button_up.connect(func():
-		var tw = btn.create_tween()
-		var target = Vector2(1.06, 1.06) if btn.is_hovered() else Vector2(1.0, 1.0)
-		tw.tween_property(btn, \"scale\", target, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	)
+	if not btn.resized.is_connected(_on_btn_resized.bind(btn)):
+		btn.resized.connect(_on_btn_resized.bind(btn))
+
+func _on_btn_resized(btn: Button) -> void:
+	if btn != null:
+		btn.pivot_offset = btn.size / 2.0
+
+func _on_prev_world_pressed() -> void:
+	if current_world_index > 0:
+		current_world_index -= 1
+		render_current_world()
+
+func _on_next_world_pressed() -> void:
+	if current_world_index < TOTAL_WORLDS - 1:
+		current_world_index += 1
+		render_current_world()
 
 func _on_level_selected(idx: int) -> void:
 	var gm = load(\"res://scripts/game_manager.gd\")
@@ -120,73 +178,299 @@ grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MobileViewport/CenterContainer"]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 12
 
 [node name="TitleLabel" type="Label" parent="MobileViewport/CenterContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 32
 text = "SELECT LEVEL"
 horizontal_alignment = 1
 
+[node name="WorldNavContainer" type="HBoxContainer" parent="MobileViewport/CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="PrevWorldButton" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/WorldNavContainer"]
+custom_minimum_size = Vector2(110, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "< PREV"
+
+[node name="WorldTitleLabel" type="Label" parent="MobileViewport/CenterContainer/VBoxContainer/WorldNavContainer"]
+custom_minimum_size = Vector2(180, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 22
+text = "WORLD 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextWorldButton" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/WorldNavContainer"]
+custom_minimum_size = Vector2(110, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "NEXT >"
+
 [node name="LevelGrid" type="GridContainer" parent="MobileViewport/CenterContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/h_separation = 16
-theme_override_constants/v_separation = 16
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
 columns = 5
 
 [node name="Level1Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
-custom_minimum_size = Vector2(120, 70)
+custom_minimum_size = Vector2(104, 46)
 layout_mode = 2
-text = "LEVEL 1"
+theme_override_font_sizes/font_size = 14
 
 [node name="Level2Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
-custom_minimum_size = Vector2(120, 70)
+custom_minimum_size = Vector2(104, 46)
 layout_mode = 2
-text = "LEVEL 2"
+theme_override_font_sizes/font_size = 14
 
 [node name="Level3Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
-custom_minimum_size = Vector2(120, 70)
+custom_minimum_size = Vector2(104, 46)
 layout_mode = 2
-text = "LEVEL 3"
+theme_override_font_sizes/font_size = 14
 
 [node name="Level4Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
-custom_minimum_size = Vector2(120, 70)
+custom_minimum_size = Vector2(104, 46)
 layout_mode = 2
-text = "LEVEL 4"
+theme_override_font_sizes/font_size = 14
 
 [node name="Level5Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
-custom_minimum_size = Vector2(120, 70)
+custom_minimum_size = Vector2(104, 46)
 layout_mode = 2
-text = "LEVEL 5"
+theme_override_font_sizes/font_size = 14
 
 [node name="Level6Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
-custom_minimum_size = Vector2(120, 70)
+custom_minimum_size = Vector2(104, 46)
 layout_mode = 2
-text = "LEVEL 6"
+theme_override_font_sizes/font_size = 14
 
 [node name="Level7Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
-custom_minimum_size = Vector2(120, 70)
+custom_minimum_size = Vector2(104, 46)
 layout_mode = 2
-text = "LEVEL 7"
+theme_override_font_sizes/font_size = 14
 
 [node name="Level8Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
-custom_minimum_size = Vector2(120, 70)
+custom_minimum_size = Vector2(104, 46)
 layout_mode = 2
-text = "LEVEL 8"
+theme_override_font_sizes/font_size = 14
 
 [node name="Level9Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
-custom_minimum_size = Vector2(120, 70)
+custom_minimum_size = Vector2(104, 46)
 layout_mode = 2
-text = "LEVEL 9"
+theme_override_font_sizes/font_size = 14
 
 [node name="Level10Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
-custom_minimum_size = Vector2(120, 70)
+custom_minimum_size = Vector2(104, 46)
 layout_mode = 2
-text = "LEVEL 10"
+theme_override_font_sizes/font_size = 14
+
+[node name="Level11Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level12Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level13Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level14Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level15Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level16Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level17Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level18Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level19Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level20Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level21Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level22Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level23Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level24Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level25Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level26Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level27Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level28Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level29Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level30Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level31Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level32Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level33Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level34Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level35Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level36Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level37Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level38Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level39Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level40Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level41Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level42Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level43Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level44Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level45Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level46Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level47Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level48Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level49Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="Level50Button" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer/LevelGrid"]
+custom_minimum_size = Vector2(104, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
 
 [node name="BackButton" type="Button" parent="MobileViewport/CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(200, 54)
+custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 text = "BACK"
