@@ -84,7 +84,7 @@ scale_amount_max = 5.0
 color = Color(0.4, 0.9, 1.0, 0.45)
 
 [node name="GridCeilingVisual" type="Line2D" parent="Playfield"]
-position = Vector2(0, -470)
+position = Vector2(0, -505)
 points = PackedVector2Array(-310, 0, 310, 0)
 width = 3.5
 default_color = Color(0.35, 0.95, 1.0, 0.85)
@@ -105,7 +105,7 @@ position = Vector2(370, 0)
 shape = SubResource("RectangleShape2D_0oucd")
 
 [node name="Ceiling" type="StaticBody2D" parent="Playfield/Boundaries"]
-position = Vector2(0, -475)
+position = Vector2(0, -510)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Playfield/Boundaries/Ceiling"]
 shape = SubResource("RectangleShape2D_o48be")
@@ -154,7 +154,7 @@ end_cap_mode = 2
 position = Vector2(0, -58)
 
 [node name="BubbleGrid" type="Node2D" parent="."]
-position = Vector2(-304, -435)
+position = Vector2(-304, -470)
 script = ExtResource("3_dbpbd")
 bubble_scene = ExtResource("1_0oucd")
 
