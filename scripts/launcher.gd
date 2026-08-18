@@ -115,13 +115,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		is_touch_aiming = true
 		touch_start_pos = event_pos
 		is_dragging = false
+		var raw_dir: Vector2 = get_aim_direction()
+		current_aim_angle = clamp(raw_dir.angle(), min_aim_angle, max_aim_angle)
 
 	elif is_up:
-		if is_touch_aiming:
+		if is_touch_aiming or can_aim:
 			is_touch_aiming = false
 			is_dragging = false
 
-			current_aim_angle = clamp(current_aim_angle, min_aim_angle, max_aim_angle)
+			var raw_dir: Vector2 = get_aim_direction()
+			current_aim_angle = clamp(raw_dir.angle(), min_aim_angle, max_aim_angle)
 			var direction: Vector2 = Vector2.from_angle(current_aim_angle).normalized()
 
 			can_aim = false

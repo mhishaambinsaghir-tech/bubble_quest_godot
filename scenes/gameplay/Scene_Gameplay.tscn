@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://dsgx2efyewe56"]
+[gd_scene load_steps=30 format=3 uid="uid://dsgx2efyewe56"]
 
 [ext_resource type="PackedScene" uid="uid://cdgxjdanbyl1q" path="res://scenes/bubbles/Bubble.tscn" id="1_0oucd"]
 [ext_resource type="Script" uid="uid://bsvpqkqwobj3i" path="res://scripts/launcher.gd" id="2_o48be"]
@@ -26,6 +26,7 @@
 [ext_resource type="Texture2D" uid="uid://xgkqpwlennfm" path="res://assets/ui/swap_button.png" id="24_swap_button"]
 [ext_resource type="Texture2D" uid="uid://c1remqlrxxnvl" path="res://assets/ui/score_badge.png" id="25_score_badge"]
 [ext_resource type="Texture2D" uid="uid://b7pgubp0gc6ap" path="res://assets/ui/stage_badge.png" id="26_stage_badge"]
+[ext_resource type="Texture2D" uid="uid://dsdg2xlgdlmkg" path="res://assets/ui/pause_panel_paused_label.png" id="27_pause_title"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8syxq"]
 size = Vector2(20, 1280)
@@ -170,6 +171,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="AimTouchArea" type="Control" parent="GameUI/HUD"]
 layout_mode = 1
@@ -179,7 +181,7 @@ anchor_bottom = 1.0
 offset_top = 380.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
+mouse_filter = 2
 
 [node name="ScoreBadge" type="TextureRect" parent="GameUI/HUD"]
 layout_mode = 1
@@ -194,6 +196,7 @@ grow_horizontal = 2
 texture = ExtResource("25_score_badge")
 expand_mode = 1
 stretch_mode = 5
+mouse_filter = 2
 
 [node name="ScoreLabel" type="Label" parent="GameUI/HUD/ScoreBadge"]
 layout_mode = 1
@@ -213,6 +216,7 @@ theme_override_font_sizes/font_size = 24
 text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
+mouse_filter = 2
 
 [node name="StageBadge" type="TextureRect" parent="GameUI/HUD"]
 layout_mode = 1
@@ -227,6 +231,7 @@ grow_horizontal = 2
 texture = ExtResource("26_stage_badge")
 expand_mode = 1
 stretch_mode = 5
+mouse_filter = 2
 
 [node name="LevelLabel" type="Label" parent="GameUI/HUD/StageBadge"]
 layout_mode = 1
@@ -336,17 +341,16 @@ grow_vertical = 2
 theme_override_constants/separation = 24
 alignment = 1
 
-[node name="PauseTitle" type="Label" parent="GameUI/HUD/PausePanel/VBoxContainer"]
+[node name="PauseTitleGraphic" type="TextureRect" parent="GameUI/HUD/PausePanel/VBoxContainer"]
+custom_minimum_size = Vector2(360, 100)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.15, 0.95)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 44
-text = "PAUSED"
-horizontal_alignment = 1
+size_flags_horizontal = 4
+texture = ExtResource("27_pause_title")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="ResumeButton" type="TextureButton" parent="GameUI/HUD/PausePanel/VBoxContainer"]
-custom_minimum_size = Vector2(280, 88)
+custom_minimum_size = Vector2(360, 108)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("10_pause_resume")
@@ -354,7 +358,7 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="RestartButton" type="TextureButton" parent="GameUI/HUD/PausePanel/VBoxContainer"]
-custom_minimum_size = Vector2(280, 88)
+custom_minimum_size = Vector2(360, 108)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("11_pause_restart")
@@ -362,7 +366,7 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="MainMenuButton" type="TextureButton" parent="GameUI/HUD/PausePanel/VBoxContainer"]
-custom_minimum_size = Vector2(280, 88)
+custom_minimum_size = Vector2(360, 108)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("12_pause_main_menu")
@@ -442,7 +446,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="NextLevelButton" type="TextureButton" parent="GameUI/HUD/WinPanel/VBoxContainer"]
-custom_minimum_size = Vector2(280, 88)
+custom_minimum_size = Vector2(360, 108)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("15_win_next_level")
@@ -450,7 +454,7 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="ReplayButton" type="TextureButton" parent="GameUI/HUD/WinPanel/VBoxContainer"]
-custom_minimum_size = Vector2(280, 88)
+custom_minimum_size = Vector2(360, 108)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("16_win_replay")
@@ -507,7 +511,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="RetryButton" type="TextureButton" parent="GameUI/HUD/LosePanel/VBoxContainer"]
-custom_minimum_size = Vector2(280, 88)
+custom_minimum_size = Vector2(360, 108)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("21_loose_retry")
@@ -515,7 +519,7 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="MainMenuButton" type="TextureButton" parent="GameUI/HUD/LosePanel/VBoxContainer"]
-custom_minimum_size = Vector2(280, 88)
+custom_minimum_size = Vector2(360, 108)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("22_loose_main_menu")

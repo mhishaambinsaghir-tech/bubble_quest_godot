@@ -1,6 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://b7bhsrrvqb2q0"]
 
 [ext_resource type="Texture2D" uid="uid://ny273q7jji8e" path="res://assets/backgrounds/levels_select_world1_bg.jpg" id="1_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/level_select_label.png" id="2_title_label"]
 
 [sub_resource type="GDScript" id="GDScript_level_select"]
 script/source = "extends Control
@@ -180,11 +181,13 @@ grow_vertical = 2
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="TitleLabel" type="Label" parent="MobileViewport/CenterContainer/VBoxContainer"]
+[node name="TitleGraphic" type="TextureRect" parent="MobileViewport/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(360, 60)
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "SELECT LEVEL"
-horizontal_alignment = 1
+size_flags_horizontal = 4
+texture = ExtResource("2_title_label")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="WorldNavContainer" type="HBoxContainer" parent="MobileViewport/CenterContainer/VBoxContainer"]
 layout_mode = 2
@@ -200,8 +203,13 @@ text = "< PREV"
 [node name="WorldTitleLabel" type="Label" parent="MobileViewport/CenterContainer/VBoxContainer/WorldNavContainer"]
 custom_minimum_size = Vector2(180, 44)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_colors/font_outline_color = Color(0.06, 0.12, 0.24, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 24
 text = "WORLD 1"
 horizontal_alignment = 1
 vertical_alignment = 1
